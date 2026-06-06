@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#1a56db"/>
+  <title>Submit Request</title>
+  <link rel="stylesheet" href="app.css"/>
+  <link rel="stylesheet" href="request.css"/>
+</head>
+<body class="request-page">
+  <main class="request-shell">
+    <section class="request-hero">
+      <p class="request-kicker">Public Intake</p>
+      <h1>Request help from the NGO volunteer team</h1>
+      <p class="request-copy">
+        Use this form for genuine assistance requests only. Repeated or false submissions may be blocked.
+      </p>
+      <div class="request-warning">
+        <strong>Important:</strong> This form is not an emergency service. For immediate danger or urgent medical emergencies, contact local emergency services directly.
+      </div>
+    </section>
+
+    <section class="request-card">
+      <form id="request-form" novalidate>
+        <label class="field-label" for="requesterName">Your name</label>
+        <input id="requesterName" name="requesterName" class="text-input" maxlength="100" required/>
+
+        <label class="field-label" for="phone">Phone number</label>
+        <input id="phone" name="phone" class="text-input" maxlength="20" inputmode="tel" required/>
+
+        <label class="field-label" for="type">Type of request</label>
+        <select id="type" name="type" class="text-input" required></select>
+
+        <label class="field-label" for="address">Address</label>
+        <textarea id="address" name="address" class="textarea" rows="3" maxlength="300" required></textarea>
+
+        <label class="field-label" for="urgency">Urgency</label>
+        <select id="urgency" name="urgency" class="text-input" required>
+          <option value="normal">Normal</option>
+          <option value="urgent">Urgent</option>
+        </select>
+
+        <label class="field-label" for="notes">Additional notes</label>
+        <textarea id="notes" name="notes" class="textarea" rows="4" maxlength="1000" placeholder="Optional details volunteers should know"></textarea>
+
+        <div id="access-code-wrap" class="hidden">
+          <label class="field-label" for="accessCode">Access code</label>
+          <input id="accessCode" name="accessCode" class="text-input" autocomplete="off"/>
+          <p class="request-meta">This is a lightweight friction control only. It is not a secure access boundary.</p>
+        </div>
+
+        <div class="honeypot" aria-hidden="true">
+          <label for="website">Website</label>
+          <input id="website" name="website" tabindex="-1" autocomplete="off"/>
+        </div>
+
+        <label class="confirm-row">
+          <input id="confirmTrueRequest" type="checkbox" required/>
+          <span>I confirm this is a real request and I will avoid duplicate submissions.</span>
+        </label>
+
+        <div class="request-actions">
+          <button id="btn-submit-request" type="submit" class="btn btn-primary btn-block">Submit request</button>
+          <a class="btn btn-outline btn-block" href="index.html">Volunteer sign-in</a>
+        </div>
+
+        <p class="request-meta">
+          To protect limited free-tier capacity, this page applies a browser cooldown after each submission.
+        </p>
+      </form>
+    </section>
+  </main>
+
+  <div id="request-toast" class="toast hidden"></div>
+  <script type="module" src="request.js"></script>
+</body>
+</html>

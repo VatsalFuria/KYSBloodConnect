@@ -1,0 +1,12 @@
+node_modules/
+functions/node_modules/
+
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+
+.DS_Store
+Thumbs.db
+
+.env
+.env.*

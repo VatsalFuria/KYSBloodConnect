@@ -1,0 +1,157 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /requests/{requestId} {
+      allow read: if request.auth != null;
+      allow create: if isValidPublicCreate();
+      allow update: if request.auth != null && isValidVolunteerUpdate();
+      allow delete: if false;
+    }
+
+    match /volunteers/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create, update: if request.auth != null
+        && request.auth.uid == userId
+        && isValidVolunteerDoc();
+      allow delete: if false;
+    }
+
+    function isValidPublicCreate() {
+      let data = request.resource.data;
+      let required = [
+        'requesterName',
+        'phone',
+        'type',
+        'address',
+        'urgency',
+        'notes',
+        'status',
+        'claimedBy',
+        'claimedByUid',
+        'claimedAt',
+        'completionNotes',
+        'completedAt',
+        'source',
+        'createdAt',
+        'updatedAt'
+      ];
+
+      return data.keys().hasAll(required)
+        && data.keys().hasOnly(required)
+        && data.requesterName is string
+        && data.requesterName.size() > 0
+        && data.requesterName.size() <= 100
+        && data.phone is string
+        && data.phone.size() > 0
+        && data.phone.size() <= 20
+        && data.type is string
+        && data.type.size() > 0
+        && data.type.size() <= 80
+        && data.address is string
+        && data.address.size() > 0
+        && data.address.size() <= 300
+        && data.urgency in ['normal', 'urgent']
+        && data.notes is string
+        && data.notes.size() <= 1000
+        && data.status == 'open'
+        && data.claimedBy == null
+        && data.claimedByUid == null
+        && data.claimedAt == null
+        && data.completionNotes == null
+        && data.completedAt == null
+        && data.source == 'hosted_form'
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp
+        && data.createdAt == request.time
+        && data.updatedAt == request.time;
+    }
+
+    function isValidVolunteerUpdate() {
+      return onlyVolunteerMutableFieldsChanged()
+        && (
+          isClaimTransition() ||
+          isDropTransition() ||
+          isOnTheWayTransition() ||
+          isDoneTransition()
+        );
+    }
+
+    function isValidVolunteerDoc() {
+      let data = request.resource.data;
+      return data.keys().hasOnly(['displayName', 'email', 'fcmToken', 'createdAt', 'updatedAt'])
+        && (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 100))
+        && (!('email' in data) || (data.email is string && data.email.size() <= 200))
+        && (!('fcmToken' in data) || (data.fcmToken is string && data.fcmToken.size() <= 4096))
+        && (!('createdAt' in data) || data.createdAt is timestamp)
+        && (!('updatedAt' in data) || data.updatedAt is timestamp);
+    }
+
+    function onlyVolunteerMutableFieldsChanged() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        'status',
+        'claimedBy',
+        'claimedByUid',
+        'claimedAt',
+        'updatedAt',
+        'completionNotes',
+        'completedAt'
+      ]);
+    }
+
+    function isClaimTransition() {
+      return resource.data.status == 'open'
+        && request.resource.data.status == 'claimed'
+        && request.resource.data.claimedByUid == request.auth.uid
+        && request.resource.data.claimedBy is string
+        && request.resource.data.claimedBy.size() > 0
+        && request.resource.data.claimedBy.size() <= 100
+        && request.resource.data.claimedAt is timestamp
+        && request.resource.data.claimedAt == request.time
+        && request.resource.data.updatedAt is timestamp
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.completedAt == resource.data.completedAt
+        && request.resource.data.completionNotes == resource.data.completionNotes;
+    }
+
+    function isDropTransition() {
+      return resource.data.status == 'claimed'
+        && resource.data.claimedByUid == request.auth.uid
+        && request.resource.data.status == 'open'
+        && request.resource.data.claimedBy == null
+        && request.resource.data.claimedByUid == null
+        && request.resource.data.claimedAt == null
+        && request.resource.data.updatedAt is timestamp
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.completedAt == resource.data.completedAt
+        && request.resource.data.completionNotes == resource.data.completionNotes;
+    }
+
+    function isOnTheWayTransition() {
+      return resource.data.status == 'claimed'
+        && resource.data.claimedByUid == request.auth.uid
+        && request.resource.data.status == 'on_the_way'
+        && request.resource.data.claimedByUid == request.auth.uid
+        && request.resource.data.claimedBy == resource.data.claimedBy
+        && request.resource.data.claimedAt == resource.data.claimedAt
+        && request.resource.data.updatedAt is timestamp
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.completedAt == resource.data.completedAt
+        && request.resource.data.completionNotes == resource.data.completionNotes;
+    }
+
+    function isDoneTransition() {
+      return resource.data.status in ['claimed', 'on_the_way']
+        && resource.data.claimedByUid == request.auth.uid
+        && request.resource.data.status == 'done'
+        && request.resource.data.claimedByUid == request.auth.uid
+        && request.resource.data.claimedBy == resource.data.claimedBy
+        && request.resource.data.claimedAt == resource.data.claimedAt
+        && request.resource.data.completionNotes is string
+        && request.resource.data.completionNotes.size() <= 1000
+        && request.resource.data.completedAt is timestamp
+        && request.resource.data.completedAt == request.time
+        && request.resource.data.updatedAt is timestamp
+        && request.resource.data.updatedAt == request.time;
+    }
+  }
+}
