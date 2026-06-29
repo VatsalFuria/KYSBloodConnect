@@ -99,6 +99,50 @@
   pointer-events: none;
 }
 
+/* ── Counter field ─────────────────────────────────────────────────────────── */
+.counter {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  width: fit-content;
+  margin-bottom: 14px;
+}
+
+.counter-btn {
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  line-height: 1;
+  border: none;
+  background: var(--gray-100);
+  color: var(--gray-800);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.counter-btn:hover { background: var(--gray-200); }
+.counter-btn:active { background: var(--blue-light); color: var(--blue); }
+
+.counter-value {
+  min-width: 48px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gray-800);
+  padding: 0 8px;
+  user-select: none;
+}
+
+/* ── Required star ─────────────────────────────────────────────────────────── */
+.required {
+  color: #dc2626;
+  margin-left: 3px;
+}
+
 @media (max-width: 640px) {
   .request-shell {
     width: calc(100% - 16px);

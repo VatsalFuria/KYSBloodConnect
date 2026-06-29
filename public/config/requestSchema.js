@@ -1,5 +1,4 @@
-// public/config/requestSchema.js
-
+// ../config/requestSchema.js
 /*
 const renderers = {
     text: renderText,
@@ -28,7 +27,8 @@ export const REQUEST_SCHEMA = {
           label: "Patient Name",
           type: "text",
           required: true,
-          default: ""
+          default: "",
+          placeholder: "Full name of the patient",
         },
 
         {
@@ -37,7 +37,7 @@ export const REQUEST_SCHEMA = {
           type: "select",
           options: ["Male", "Female"],
           required: true,
-          default: ""
+          default: "",
         },
 
         {
@@ -45,21 +45,16 @@ export const REQUEST_SCHEMA = {
           label: "Age",
           type: "number",
           required: true,
-          default: null
+          default: null,
         },
 
         {
           id: "bloodGroup",
           label: "Blood Group",
           type: "select",
-          options: [
-            "A+","A-",
-            "B+","B-",
-            "AB+","AB-",
-            "O+","O-"
-          ],
+          options: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
           required: true,
-          default: ""
+          default: "",
         },
 
         {
@@ -67,7 +62,8 @@ export const REQUEST_SCHEMA = {
           label: "Primary Mobile",
           type: "phone",
           required: true,
-          default: ""
+          default: "",
+          placeholder: "10-digit mobile number, preferably Whatsapp",
         },
 
         {
@@ -75,10 +71,9 @@ export const REQUEST_SCHEMA = {
           label: "Alternate Mobile",
           type: "phone",
           required: false,
-          default: ""
-        }
-
-      ]
+          default: "",
+        },
+      ],
     },
 
     {
@@ -91,7 +86,8 @@ export const REQUEST_SCHEMA = {
           label: "Hospital Name",
           type: "text",
           required: true,
-          default: ""
+          default: "",
+          placeholder: "Name of the hospital where patient is admitted",
         },
 
         {
@@ -100,7 +96,7 @@ export const REQUEST_SCHEMA = {
           type: "select",
           options: ["North", "South", "East", "West"], //NEED TO POPULATE OPTIONS
           required: true,
-          default: ""
+          default: "",
         },
 
         {
@@ -108,9 +104,10 @@ export const REQUEST_SCHEMA = {
           label: "Reference By",
           type: "text",
           required: false,
-          default: ""
-        }
-      ]
+          default: "",
+          placeholder: "Name of the person who referred you",
+        },
+      ],
     },
 
     {
@@ -123,7 +120,7 @@ export const REQUEST_SCHEMA = {
           label: "PCV",
           type: "counter",
           required: true,
-          default: 0
+          default: 0,
         },
 
         {
@@ -131,7 +128,7 @@ export const REQUEST_SCHEMA = {
           label: "FFP",
           type: "counter",
           required: true,
-          default: 0
+          default: 0,
         },
 
         {
@@ -139,33 +136,33 @@ export const REQUEST_SCHEMA = {
           label: "SDP",
           type: "counter",
           required: true,
-          default: 0
+          default: 0,
         },
 
         {
           id: "requiredBefore",
-          label: "Required Before",
+          label: "Required Before (Date : Time)",
           type: "datetime",
           required: true,
-          default: "today"
-        }
-      ]
+          default: "",
+        },
+      ],
     },
 
-    {
-      id: "documents",
-      title: "Documents",
+    // {
+    //   id: "documents",
+    //   title: "Documents",
 
-      fields: [
-        {
-          id: "hospitalLetter",
-          label: "Hospital Letter",
-          type: "file",
-          required: false,
-          default: null
-        }
-      ]
-    },
+    //   fields: [
+    //     {
+    //       id: "hospitalLetter",
+    //       label: "Hospital Letter",
+    //       type: "file",
+    //       required: false,
+    //       default: null,
+    //     },
+    //   ],
+    // },
 
     {
       id: "remarks",
@@ -174,12 +171,12 @@ export const REQUEST_SCHEMA = {
       fields: [
         {
           id: "remarks",
-          label: "Remarks",
+          label: "Remarks if any",
           type: "textarea",
           required: false,
-          default: ""
-        }
-      ]
-    }
-  ]
+          default: "",
+        },
+      ],
+    },
+  ],
 };

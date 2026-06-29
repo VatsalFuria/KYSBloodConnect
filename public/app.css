@@ -213,7 +213,7 @@ body {
 .contact-row { display: flex; gap: 8px; }
 
 /* ── Completion notes ─────────────────────────────────────────────────────── */
-.field-label { font-size: 13px; font-weight: 600; color: var(--gray-600); display: block; margin-bottom: 6px; }
+.field-label { font-size: 15px; font-weight: 600; color: var(--gray-600); display: block; margin-bottom: 6px; }
 .textarea {
   width: 100%; padding: 10px 12px; border: 1px solid var(--gray-200);
   border-radius: var(--radius-sm); font-size: 14px; font-family: inherit;

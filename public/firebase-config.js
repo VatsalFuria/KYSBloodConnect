@@ -5,7 +5,7 @@ const FIREBASE_CONFIG = {
   projectId: "kys-blood-connect",
   storageBucket: "kys-blood-connect.firebasestorage.app",
   messagingSenderId: "1017049020883",
-  appId: "1:1017049020883:web:dc8ad0dea46d399944d726"
+  appId: "1:1017049020883:web:dc8ad0dea46d399944d726",
 };
 
 // Firebase Console -> Project Settings -> Cloud Messaging -> Web Push certificates
@@ -31,8 +31,9 @@ const APP_CONFIG = {
     "Home visit",
     "Groceries",
     "Documents",
-    "Other"
-  ]
+    "Other",
+  ],
+  TOAST_DURATION: 8, // seconds
 };
 
 export { FIREBASE_CONFIG, VAPID_KEY, APP_CONFIG };
