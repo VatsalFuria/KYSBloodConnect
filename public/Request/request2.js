@@ -11,6 +11,7 @@ import {
   collection,
   getFirestore,
   serverTimestamp,
+  Timestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const app = initializeApp(FIREBASE_CONFIG);
@@ -87,6 +88,8 @@ document.addEventListener("submit", async (e) => {
   setSubmitting(submitBtn, true);
 
   try {
+    console.log("Submitting payload:", payload);
+
     const ref = await addDoc(collection(db, "blood_requests"), {
       ...payload,
       status: "open",
@@ -113,20 +116,47 @@ document.addEventListener("submit", async (e) => {
 });
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
+function convertValue(field, raw) {
+  switch (field.dataType) {
+    case "string":
+      return raw == null ? "" : String(raw).trim();
+
+    case "int":
+      return raw == null || raw === "" ? null : parseInt(raw, 10);
+
+    case "float":
+      return raw == null || raw === "" ? null : parseFloat(raw);
+
+    case "boolean":
+      return Boolean(raw);
+
+    case "timestamp":
+      return raw ? Timestamp.fromDate(new Date(raw)) : null;
+
+    default:
+      return raw;
+  }
+}
+
 function collectPayload(formData) {
   const payload = {};
+
   REQUEST_SCHEMA.sections.forEach((section) => {
     section.fields.forEach((field) => {
       if (field.type === "counter") {
-        payload[field.id] = counterValues[field.id] ?? 0;
-      } else if (field.type === "file") {
-        payload[field.id] = null; // File upload needs Firebase Storage — out of scope here.
-      } else {
-        const raw = formData.get(field.id);
-        payload[field.id] = raw !== null ? String(raw).trim() : "";
+        payload[field.id] = counterValues[field.id];
+        return;
       }
+
+      if (field.type === "file") {
+        payload[field.id] = null;
+        return;
+      }
+
+      payload[field.id] = convertValue(field, formData.get(field.id));
     });
   });
+
   return payload;
 }
 

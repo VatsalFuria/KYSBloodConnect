@@ -1,7 +1,7 @@
 {
-  "name": "NGO Requests",
-  "short_name": "Requests",
-  "description": "Volunteer coordination for service requests",
+  "name": "KYS Blood Connect",
+  "short_name": "BloodConnect",
+  "description": "KYS Volunteer coordination for blood requests",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",

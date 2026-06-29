@@ -21,7 +21,7 @@ function renderForm(schema, container) {
   schema.sections.forEach((section) => {
     const sectionDiv = document.createElement("div");
 
-    sectionDiv.innerHTML = `<br><h2>${section.title}</h2><br>`;
+    sectionDiv.innerHTML = `<h3>${section.title}</h3><br>`;
 
     section.fields.forEach((field) => {
       const element = renderField(field);

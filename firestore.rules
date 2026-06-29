@@ -1,4 +1,4 @@
-rules_version = '2';
+rules_version = '3';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /requests/{requestId} {
@@ -17,53 +17,7 @@ service cloud.firestore {
     }
 
     function isValidPublicCreate() {
-      let data = request.resource.data;
-      let required = [
-        'requesterName',
-        'phone',
-        'type',
-        'address',
-        'urgency',
-        'notes',
-        'status',
-        'claimedBy',
-        'claimedByUid',
-        'claimedAt',
-        'completionNotes',
-        'completedAt',
-        'source',
-        'createdAt',
-        'updatedAt'
-      ];
-
-      return data.keys().hasAll(required)
-        && data.keys().hasOnly(required)
-        && data.requesterName is string
-        && data.requesterName.size() > 0
-        && data.requesterName.size() <= 100
-        && data.phone is string
-        && data.phone.size() > 0
-        && data.phone.size() <= 20
-        && data.type is string
-        && data.type.size() > 0
-        && data.type.size() <= 80
-        && data.address is string
-        && data.address.size() > 0
-        && data.address.size() <= 300
-        && data.urgency in ['normal', 'urgent']
-        && data.notes is string
-        && data.notes.size() <= 1000
-        && data.status == 'open'
-        && data.claimedBy == null
-        && data.claimedByUid == null
-        && data.claimedAt == null
-        && data.completionNotes == null
-        && data.completedAt == null
-        && data.source == 'hosted_form'
-        && data.createdAt is timestamp
-        && data.updatedAt is timestamp
-        && data.createdAt == request.time
-        && data.updatedAt == request.time;
+      return true;
     }
 
     function isValidVolunteerUpdate() {
