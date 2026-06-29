@@ -1,4 +1,4 @@
-import { APP_CONFIG, FIREBASE_CONFIG } from "./firebase-config.js";
+import { APP_CONFIG, FIREBASE_CONFIG } from "../firebase-config.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   addDoc,

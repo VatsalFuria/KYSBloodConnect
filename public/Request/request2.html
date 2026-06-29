@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#1a56db" />
+    <title>Submit Request</title>
+    <link rel="stylesheet" href="/public/app.css" />
+    <link rel="stylesheet" href="request.css" />
+  </head>
+  <body class="request-page">
+    <main class="request-shell">
+      
+      <section class="request-hero">
+        <p class="request-kicker">Public Intake</p>
+        <h1>Request Blood Assistance From KYS</h1>
+        <p class="request-warning">Use this form once only.</p>
+        <!-- <div class="request-warning">
+          <strong>Important:</strong> This form is not an emergency service. For
+          immediate danger or urgent medical emergencies, contact local
+          emergency services directly.
+        </div> -->
+      </section>
+
+      <section class="request-card">
+      <div id="formContainer"></div>
+      </section>
+
+    </main>
+      <div id="request-toast" class="toast hidden"></div>
+
+    <script type="module" src="requestRender.js"></script>
+  </body>
+</html>
