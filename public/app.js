@@ -1,11 +1,12 @@
 import { FIREBASE_CONFIG, VAPID_KEY, APP_CONFIG } from "./firebase-config.js";
+import { createJob } from "./config/jobSchema.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getAuth,
   GoogleAuthProvider,
   onAuthStateChanged,
   signInWithPopup,
-  signOut
+  signOut,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import {
   collection,
@@ -18,7 +19,7 @@ import {
   runTransaction,
   serverTimestamp,
   setDoc,
-  updateDoc
+  updateDoc,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const app = initializeApp(FIREBASE_CONFIG);
@@ -33,6 +34,7 @@ let unsubscribeRequests = null;
 let messaging = null;
 
 const screenAuth = document.getElementById("screen-auth");
+const screenPending = document.getElementById("screen-pending");
 const screenApp = document.getElementById("screen-app");
 const btnSignin = document.getElementById("btn-google-signin");
 const btnSignout = document.getElementById("btn-signout");
@@ -45,11 +47,15 @@ const btnCloseSheet = document.getElementById("btn-close-sheet");
 const toastEl = document.getElementById("toast");
 const alertBanner = document.getElementById("alert-banner");
 const alertBannerCopy = document.getElementById("alert-banner-copy");
-const btnDismissAlertBanner = document.getElementById("btn-dismiss-alert-banner");
+const btnDismissAlertBanner = document.getElementById(
+  "btn-dismiss-alert-banner",
+);
 
 btnSignin.addEventListener("click", () => {
   const provider = new GoogleAuthProvider();
-  signInWithPopup(auth, provider).catch(err => showToast("Sign-in failed: " + err.message));
+  signInWithPopup(auth, provider).catch((err) =>
+    showToast("Sign-in failed: " + err.message),
+  );
 });
 
 btnSignout.addEventListener("click", () => {
@@ -57,47 +63,61 @@ btnSignout.addEventListener("click", () => {
   signOut(auth);
 });
 
-onAuthStateChanged(auth, async user => {
+onAuthStateChanged(auth, async (user) => {
   currentUser = user;
   if (user) {
-    showScreen("app");
-    startListening();
-    maybeShowAlertBanner();
-    await initOptionalMessaging();
+    if (checkVolunteerAccess(user)) {
+      showScreen("app");
+      startListening();
+      maybeShowAlertBanner();
+      await initOptionalMessaging();
+    } else {
+      showScreen("pending");
+    }
   } else {
     showScreen("auth");
   }
 });
 
+function checkVolunteerAccess(user) {
+  //check if admin has provided access, else add in requests for admin to approve
+  return true;
+}
+
 function startListening() {
   if (unsubscribeRequests) unsubscribeRequests();
 
-  const q = query(
-    collection(db, "requests"),
-    orderBy("createdAt", "desc"),
-    limit(APP_CONFIG.MAX_ACTIVE_REQUESTS_QUERY)
-  );
-
+  const q = APP_CONFIG.LIMIT_REQUEST_QUERY
+    ? query(
+        collection(db, APP_CONFIG.COLLECTION_NAME),
+        orderBy("createdAt", "desc"),
+        limit(APP_CONFIG.MAX_ACTIVE_REQUESTS_QUERY),
+      )
+    : query(
+        collection(db, APP_CONFIG.COLLECTION_NAME),
+        orderBy("createdAt", "desc"),
+      );
   unsubscribeRequests = onSnapshot(
     q,
-    snap => {
-      allRequests = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    (snap) => {
+      allRequests = snap.docs.map((d) => createJob(d.id, d.data()));
       renderList();
       updateBadge();
     },
-    () => showToast("Failed to load requests")
+    () => showToast("Failed to load requests"),
   );
 }
 
 function renderList() {
-  const filtered = activeFilter === "all"
-    ? allRequests
-    : allRequests.filter(r => {
-        if (activeFilter === "claimed") {
-          return r.status === "claimed" || r.status === "on_the_way";
-        }
-        return r.status === activeFilter;
-      });
+  const filtered =
+    activeFilter === "all"
+      ? allRequests
+      : allRequests.filter((r) => {
+          if (activeFilter === "claimed") {
+            return r.status === "claimed" || r.status === "on_the_way";
+          }
+          return r.status === activeFilter;
+        });
 
   cardsWrap.innerHTML = "";
 
@@ -107,7 +127,7 @@ function renderList() {
   }
   emptyState.classList.add("hidden");
 
-  filtered.forEach(req => {
+  filtered.forEach((req) => {
     const card = document.createElement("div");
     card.className = "card";
     card.innerHTML = `
@@ -127,9 +147,11 @@ function renderList() {
   });
 }
 
-document.querySelectorAll(".tab").forEach(tab => {
+document.querySelectorAll(".tab").forEach((tab) => {
   tab.addEventListener("click", () => {
-    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    document
+      .querySelectorAll(".tab")
+      .forEach((t) => t.classList.remove("active"));
     tab.classList.add("active");
     activeFilter = tab.dataset.filter;
     renderList();
@@ -137,13 +159,13 @@ document.querySelectorAll(".tab").forEach(tab => {
 });
 
 function updateBadge() {
-  const openCount = allRequests.filter(r => r.status === "open").length;
+  const openCount = allRequests.filter((r) => r.status === "open").length;
   badgeCount.textContent = openCount;
   badgeCount.classList.toggle("hidden", openCount === 0);
 }
 
 function openSheet(requestId) {
-  const req = allRequests.find(r => r.id === requestId);
+  const req = allRequests.find((r) => r.id === requestId);
   if (!req) return;
   activeRequest = req;
 
@@ -204,7 +226,9 @@ function renderActions(req) {
     notesWrap.classList.remove("hidden");
 
     const onWayBtn = makeBtn("Mark: On my way", "btn-outline btn-block");
-    onWayBtn.addEventListener("click", () => updateStatus(req.id, "on_the_way"));
+    onWayBtn.addEventListener("click", () =>
+      updateStatus(req.id, "on_the_way"),
+    );
     area.appendChild(onWayBtn);
 
     const doneBtn = makeBtn("Mark as done", "btn-success btn-block");
@@ -217,7 +241,8 @@ function renderActions(req) {
     area.appendChild(dropBtn);
   } else if (req.status === "claimed" && !isMe) {
     const info = document.createElement("p");
-    info.style.cssText = "font-size:14px;color:#4b5563;text-align:center;padding:8px 0";
+    info.style.cssText =
+      "font-size:14px;color:#4b5563;text-align:center;padding:8px 0";
     info.textContent = `Claimed by ${req.claimedBy} - available if they drop it`;
     area.appendChild(info);
   } else if (req.status === "on_the_way" && isMe) {
@@ -227,7 +252,8 @@ function renderActions(req) {
     area.appendChild(doneBtn);
   } else if (req.status === "done") {
     const info = document.createElement("p");
-    info.style.cssText = "font-size:14px;color:#057a55;text-align:center;padding:8px 0;font-weight:600";
+    info.style.cssText =
+      "font-size:14px;color:#057a55;text-align:center;padding:8px 0;font-weight:600";
     info.textContent = "Completed";
     area.appendChild(info);
   }
@@ -262,8 +288,8 @@ async function claimRequest(requestId) {
   }
 
   try {
-    const ref = doc(db, "requests", requestId);
-    await runTransaction(db, async tx => {
+    const ref = doc(db, APP_CONFIG.COLLECTION_NAME, requestId);
+    await runTransaction(db, async (tx) => {
       const snap = await tx.get(ref);
       if (!snap.exists()) throw new Error("Request not found");
       if (snap.data().status !== "open") throw new Error("Already claimed");
@@ -273,15 +299,17 @@ async function claimRequest(requestId) {
         claimedBy: currentUser.displayName || currentUser.email || "Volunteer",
         claimedByUid: currentUser.uid,
         claimedAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
     });
     showToast("Request claimed");
     closeSheet();
   } catch (err) {
-    showToast(err.message === "Already claimed"
-      ? "Someone else just claimed this - try another"
-      : "Failed: " + err.message);
+    showToast(
+      err.message === "Already claimed"
+        ? "Someone else just claimed this - try another"
+        : "Failed: " + err.message,
+    );
     if (btn) {
       btn.disabled = false;
       btn.textContent = "Claim this request";
@@ -291,9 +319,9 @@ async function claimRequest(requestId) {
 
 async function updateStatus(requestId, newStatus) {
   try {
-    await updateDoc(doc(db, "requests", requestId), {
+    await updateDoc(doc(db, APP_CONFIG.COLLECTION_NAME, requestId), {
       status: newStatus,
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
     });
     showToast("Status updated");
     closeSheet();
@@ -305,11 +333,11 @@ async function updateStatus(requestId, newStatus) {
 async function completeRequest(requestId) {
   const notes = document.getElementById("completion-notes").value.trim();
   try {
-    await updateDoc(doc(db, "requests", requestId), {
+    await updateDoc(doc(db, APP_CONFIG.COLLECTION_NAME, requestId), {
       status: "done",
       completionNotes: notes,
       completedAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
     });
     showToast("Marked as done");
     closeSheet();
@@ -321,12 +349,12 @@ async function completeRequest(requestId) {
 async function dropClaim(requestId) {
   if (!confirm("Drop your claim? It will go back to open.")) return;
   try {
-    await updateDoc(doc(db, "requests", requestId), {
+    await updateDoc(doc(db, APP_CONFIG.COLLECTION_NAME, requestId), {
       status: "open",
       claimedBy: null,
       claimedByUid: null,
       claimedAt: null,
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
     });
     showToast("Claim dropped");
     closeSheet();
@@ -336,18 +364,22 @@ async function dropClaim(requestId) {
 }
 
 async function initOptionalMessaging() {
-  if (!APP_CONFIG.ENABLE_FCM || !currentUser || !("serviceWorker" in navigator)) return;
+  if (!APP_CONFIG.ENABLE_FCM || !currentUser || !("serviceWorker" in navigator))
+    return;
 
   try {
-    const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
-    const messagingSdk = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js");
+    const registration = await navigator.serviceWorker.register(
+      "/firebase-messaging-sw.js",
+    );
+    const messagingSdk =
+      await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js");
     messaging = messagingSdk.getMessaging(app);
 
     if (Notification.permission === "granted") {
       await saveVolunteerToken(registration, messagingSdk.getToken);
     }
 
-    messagingSdk.onMessage(messaging, payload => {
+    messagingSdk.onMessage(messaging, (payload) => {
       const { title, body } = payload.notification || {};
       showToast(`Alert: ${title || "New request"}${body ? ` - ${body}` : ""}`);
     });
@@ -360,19 +392,23 @@ async function saveVolunteerToken(registration, getTokenFn) {
   try {
     const token = await getTokenFn(messaging, {
       vapidKey: VAPID_KEY,
-      serviceWorkerRegistration: registration
+      serviceWorkerRegistration: registration,
     });
     if (!token) return;
 
     const tokenKey = `ngo:fcm:${currentUser.uid}`;
     if (localStorage.getItem(tokenKey) === token) return;
 
-    await setDoc(doc(db, "volunteers", currentUser.uid), {
-      fcmToken: token,
-      displayName: currentUser.displayName || "",
-      email: currentUser.email || "",
-      updatedAt: serverTimestamp()
-    }, { merge: true });
+    await setDoc(
+      doc(db, "volunteers", currentUser.uid),
+      {
+        fcmToken: token,
+        displayName: currentUser.displayName || "",
+        email: currentUser.email || "",
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true },
+    );
 
     localStorage.setItem(tokenKey, token);
   } catch (err) {
@@ -381,15 +417,18 @@ async function saveVolunteerToken(registration, getTokenFn) {
 }
 
 function maybeShowAlertBanner() {
-  if (!alertBanner || localStorage.getItem("ngo:alert-banner-dismissed") === "1") return;
+  if (
+    !alertBanner ||
+    localStorage.getItem("ngo:alert-banner-dismissed") === "1"
+  )
+    return;
 
   const channels = [];
   if (APP_CONFIG.ENABLE_EMAIL_ALERTS) channels.push("email");
   if (APP_CONFIG.ENABLE_TELEGRAM_ALERTS) channels.push("Telegram");
 
   if (channels.length > 0) {
-    alertBannerCopy.textContent =
-      `Alerts are delivered through ${channels.join(" and ")}. Keep the app open for the live queue.`;
+    alertBannerCopy.textContent = `Alerts are delivered through ${channels.join(" and ")}. Keep the app open for the live queue.`;
   } else {
     alertBannerCopy.textContent =
       "Mobile push is off on the free plan. Keep the app open for live updates, or enable the optional alert relay in config.";
@@ -405,6 +444,7 @@ btnDismissAlertBanner?.addEventListener("click", () => {
 
 function showScreen(name) {
   screenAuth.classList.toggle("active", name === "auth");
+  screenPending.classList.toggle("active", name === "pending");
   screenApp.classList.toggle("active", name === "app");
 }
 
@@ -427,12 +467,14 @@ function esc(str = "") {
 }
 
 function statusLabel(status) {
-  return {
-    open: "Open",
-    claimed: "Claimed",
-    on_the_way: "On the way",
-    done: "Done"
-  }[status] || status;
+  return (
+    {
+      open: "Open",
+      claimed: "Claimed",
+      on_the_way: "On the way",
+      done: "Done",
+    }[status] || status
+  );
 }
 
 function timeAgo(date) {

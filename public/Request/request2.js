@@ -4,7 +4,7 @@
 // then this file.
 
 import { FIREBASE_CONFIG, APP_CONFIG } from "../firebase-config.js";
-import { REQUEST_SCHEMA } from "../config/requestSchema.js";
+import { REQUEST_SCHEMA} from "../config/requestSchema.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   addDoc,
@@ -13,6 +13,7 @@ import {
   serverTimestamp,
   Timestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getDefaultJobData } from "../config/jobSchema.js";
 
 const app = initializeApp(FIREBASE_CONFIG);
 const db = getFirestore(app);
@@ -88,16 +89,19 @@ document.addEventListener("submit", async (e) => {
   setSubmitting(submitBtn, true);
 
   try {
-    console.log("Submitting payload:", payload);
+    console.log("Submitting payload:", {
+      ...getDefaultJobData(),
+      ...payload,
+
+      source: "blood_request_form",
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
 
     const ref = await addDoc(collection(db, "blood_requests"), {
+      ...getDefaultJobData(),
       ...payload,
-      status: "open",
-      claimedBy: null,
-      claimedByUid: null,
-      claimedAt: null,
-      completionNotes: null,
-      completedAt: null,
+
       source: "blood_request_form",
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),

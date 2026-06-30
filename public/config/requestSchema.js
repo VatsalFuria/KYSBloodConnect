@@ -194,3 +194,10 @@ export const REQUEST_SCHEMA = {
     },
   ],
 };
+
+export function getAllRequestSchemaFields() {
+    return REQUEST_SCHEMA.sections.reduce(
+        (fields, section) => fields.concat(section.fields),
+        []
+    );
+}
