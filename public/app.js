@@ -1,5 +1,5 @@
 import { FIREBASE_CONFIG, VAPID_KEY, APP_CONFIG } from "./firebase-config.js";
-import { createJob } from "./config/jobSchema.js";
+import { createJob, createTestJob } from "./config/jobSchema.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getAuth,
@@ -28,7 +28,7 @@ const db = getFirestore(app);
 
 let currentUser = null;
 let allRequests = [];
-let activeFilter = "open";
+let activeFilter = "active";
 let activeRequest = null;
 let unsubscribeRequests = null;
 let messaging = null;
@@ -76,14 +76,30 @@ onAuthStateChanged(auth, async (user) => {
     }
   } else {
     showScreen("auth");
+
+    if (APP_CONFIG.TEST) {
+      showScreen("app");
+      console.log("TEST MODE: creating a test job");
+      allRequests = [createTestJob("open", null, null), createTestJob("claimed", "Test Volunteer", "test-volunteer-uid"),];
+      console.log("Test job created:", allRequests);
+      renderList();
+      updateBadge();
+    }
+
   }
 });
 
+/**
+ * Checks whether the signed-in user can access the volunteer dashboard.
+ */
 function checkVolunteerAccess(user) {
   //check if admin has provided access, else add in requests for admin to approve
   return true;
 }
 
+/**
+ * Starts the live Firestore listener for request updates.
+ */
 function startListening() {
   if (unsubscribeRequests) unsubscribeRequests();
 
@@ -96,6 +112,7 @@ function startListening() {
     : query(
         collection(db, APP_CONFIG.COLLECTION_NAME),
         orderBy("createdAt", "desc"),
+        limit(999),
       );
   unsubscribeRequests = onSnapshot(
     q,
@@ -108,14 +125,22 @@ function startListening() {
   );
 }
 
+/**
+ * Renders the request cards for the currently selected filter.
+ * Each request gets its html, and appended.
+ * Calls openSheet() when a card is clicked to show the detail sheet.
+ */
 function renderList() {
   const filtered =
     activeFilter === "all"
       ? allRequests
       : allRequests.filter((r) => {
-          if (activeFilter === "claimed") {
-            return r.status === "claimed" || r.status === "on_the_way";
+          if (activeFilter === "active") {
+            return r.status === "open" || r.status === "claimed" || r.status === "on_the_way";
           }
+          // else if (activeFilter === "claimed") {
+          //   return r.status === "claimed" || r.status === "on_the_way";
+          // }
           return r.status === activeFilter;
         });
 
@@ -129,18 +154,27 @@ function renderList() {
 
   filtered.forEach((req) => {
     const card = document.createElement("div");
-    card.className = "card";
+    card.className = `card card-${req.status}`;
     card.innerHTML = `
       <div class="card-top">
-        <span class="card-type">${esc(req.type)}</span>
+
+        <span class="card-heading1">${esc(req.patientName + "  |  " + req.area)}</span>
+
         <span class="status-badge status-${req.status}">${statusLabel(req.status)}</span>
+
       </div>
+
       <div class="card-meta">
-        <span class="card-addr">${esc(req.address)}</span>
-        ${req.urgency === "urgent" ? `<span class="urgency-badge urgency-urgent">Urgent</span>` : ""}
+
+        <span class="card-heading2">${esc(req.bloodGroup + "  |  " + req.hospitalName)}</span>
+
+        ${req.bloodGroup.includes("-") ? `<span class="urgency-badge urgency-urgent">${esc(req.bloodGroup)}</span>` : ""}
+
         <span class="card-time">${timeAgo(req.createdAt?.toDate?.() || new Date())}</span>
+
       </div>
-      ${req.claimedBy ? `<div class="card-claimed">Claimed by ${esc(req.claimedBy)}</div>` : ""}
+
+      ${req.claimedBy ? `<div class="card-claimedBy">Claimed by ${esc(req.claimedBy)}</div>` : ""}
     `;
     card.addEventListener("click", () => openSheet(req.id));
     cardsWrap.appendChild(card);
@@ -158,29 +192,37 @@ document.querySelectorAll(".tab").forEach((tab) => {
   });
 });
 
+/**
+ * Updates the open-request count badge.
+ */
 function updateBadge() {
   const openCount = allRequests.filter((r) => r.status === "open").length;
-  badgeCount.textContent = openCount;
+  badgeCount.textContent = "Open: " + openCount;
   badgeCount.classList.toggle("hidden", openCount === 0);
 }
 
+/**
+ * Opens the detail sheet for a selected request.
+ * enables Volunteer actions
+ */
 function openSheet(requestId) {
   const req = allRequests.find((r) => r.id === requestId);
+
   if (!req) return;
   activeRequest = req;
 
-  document.getElementById("d-type").textContent = req.type;
+  document.getElementById("d-type").textContent = req.bloodGroup;
   const urgBadge = document.getElementById("d-urgency-badge");
   urgBadge.textContent = req.urgency === "urgent" ? "Urgent" : "Normal";
   urgBadge.className = `urgency-badge urgency-${req.urgency}`;
 
-  document.getElementById("d-name").textContent = req.requesterName;
-  document.getElementById("d-phone").textContent = req.phone;
-  document.getElementById("d-address").textContent = req.address;
+  document.getElementById("d-name").textContent = req.patientName;
+  document.getElementById("d-phone").textContent = req.primaryMobile;
+  document.getElementById("d-address").textContent = req.area + ", " + req.hospitalName;
 
   const notesRow = document.getElementById("d-notes-row");
-  if (req.notes) {
-    document.getElementById("d-notes").textContent = req.notes;
+  if (req.remarks) {
+    document.getElementById("d-notes").textContent = req.remarks;
     notesRow.classList.remove("hidden");
   } else {
     notesRow.classList.add("hidden");
@@ -194,11 +236,11 @@ function openSheet(requestId) {
     claimedRow.classList.add("hidden");
   }
 
-  document.getElementById("btn-call").href = `tel:${req.phone}`;
+  document.getElementById("btn-call").href = `tel:${req.primaryMobile}`;
   document.getElementById("btn-maps").href =
-    `https://maps.google.com/?q=${encodeURIComponent(req.address)}`;
+    `https://maps.google.com/?q=${encodeURIComponent(req.area + ", " + req.hospitalName)}`;
   document.getElementById("btn-whatsapp").href =
-    `https://wa.me/91${req.phone.replace(/\D/g, "")}`;
+    `https://wa.me/91${req.primaryMobile.replace(/\D/g, "")}`;
 
   renderActions(req);
 
@@ -210,6 +252,9 @@ function openSheet(requestId) {
   });
 }
 
+/**
+ * Renders the available workflow actions for a request.
+ */
 function renderActions(req) {
   const area = document.getElementById("action-area");
   const notesWrap = document.getElementById("completion-notes-wrap");
@@ -259,6 +304,9 @@ function renderActions(req) {
   }
 }
 
+/**
+ * Creates a styled button element.
+ */
 function makeBtn(label, classes) {
   const b = document.createElement("button");
   b.className = `btn ${classes}`;
@@ -269,6 +317,9 @@ function makeBtn(label, classes) {
 btnCloseSheet.addEventListener("click", closeSheet);
 sheetOverlay.addEventListener("click", closeSheet);
 
+/**
+ * Closes the request detail sheet and clears its temporary state.
+ */
 function closeSheet() {
   sheetOverlay.classList.remove("visible");
   detailSheet.classList.remove("visible");
@@ -280,6 +331,9 @@ function closeSheet() {
   }, 280);
 }
 
+/**
+ * Claims an open request for the current volunteer.
+ */
 async function claimRequest(requestId) {
   const btn = document.querySelector("#action-area .btn-primary");
   if (btn) {
@@ -317,6 +371,9 @@ async function claimRequest(requestId) {
   }
 }
 
+/**
+ * Updates the workflow status of a request.
+ */
 async function updateStatus(requestId, newStatus) {
   try {
     await updateDoc(doc(db, APP_CONFIG.COLLECTION_NAME, requestId), {
@@ -330,6 +387,9 @@ async function updateStatus(requestId, newStatus) {
   }
 }
 
+/**
+ * Marks a request as completed with optional completion notes.
+ */
 async function completeRequest(requestId) {
   const notes = document.getElementById("completion-notes").value.trim();
   try {
@@ -346,6 +406,9 @@ async function completeRequest(requestId) {
   }
 }
 
+/**
+ * Releases the current volunteer's claim and reopens the request.
+ */
 async function dropClaim(requestId) {
   if (!confirm("Drop your claim? It will go back to open.")) return;
   try {
@@ -363,6 +426,9 @@ async function dropClaim(requestId) {
   }
 }
 
+/**
+ * Initializes Firebase Cloud Messaging for volunteer alerts. Disabled, not configured because free plan limit.
+ */
 async function initOptionalMessaging() {
   if (!APP_CONFIG.ENABLE_FCM || !currentUser || !("serviceWorker" in navigator))
     return;
@@ -388,6 +454,9 @@ async function initOptionalMessaging() {
   }
 }
 
+/**
+ * Saves the current volunteer's FCM token to Firestore.
+ */
 async function saveVolunteerToken(registration, getTokenFn) {
   try {
     const token = await getTokenFn(messaging, {
@@ -416,6 +485,9 @@ async function saveVolunteerToken(registration, getTokenFn) {
   }
 }
 
+/**
+ * Shows the alert-delivery banner when it has not been dismissed.
+ */
 function maybeShowAlertBanner() {
   if (
     !alertBanner ||
@@ -442,12 +514,18 @@ btnDismissAlertBanner?.addEventListener("click", () => {
   alertBanner.classList.add("hidden");
 });
 
+/**
+ * Switches the visible top-level screen.
+ */
 function showScreen(name) {
   screenAuth.classList.toggle("active", name === "auth");
   screenPending.classList.toggle("active", name === "pending");
   screenApp.classList.toggle("active", name === "app");
 }
 
+/**
+ * Displays a temporary toast message.
+ */
 function showToast(msg, duration = 3000) {
   toastEl.textContent = msg;
   toastEl.classList.remove("hidden");
@@ -459,6 +537,9 @@ function showToast(msg, duration = 3000) {
   }, duration);
 }
 
+/**
+ * Escapes text for safe insertion into HTML templates.
+ */
 function esc(str = "") {
   return String(str)
     .replace(/&/g, "&amp;")
@@ -466,6 +547,9 @@ function esc(str = "") {
     .replace(/>/g, "&gt;");
 }
 
+/**
+ * Converts a request status code into display text.
+ */
 function statusLabel(status) {
   return (
     {
@@ -477,6 +561,9 @@ function statusLabel(status) {
   );
 }
 
+/**
+ * Formats a date as a short relative time.
+ */
 function timeAgo(date) {
   if (!date) return "";
   const seconds = Math.floor((Date.now() - date.getTime()) / 1000);

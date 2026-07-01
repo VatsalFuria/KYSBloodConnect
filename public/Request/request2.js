@@ -4,7 +4,7 @@
 // then this file.
 
 import { FIREBASE_CONFIG, APP_CONFIG } from "../firebase-config.js";
-import { REQUEST_SCHEMA} from "../config/requestSchema.js";
+import { REQUEST_SCHEMA } from "../config/requestSchema.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   addDoc,
@@ -89,16 +89,23 @@ document.addEventListener("submit", async (e) => {
   setSubmitting(submitBtn, true);
 
   try {
-    console.log("Submitting payload:", {
-      ...getDefaultJobData(),
-      ...payload,
+    if (APP_CONFIG.TEST) {
+      console.log("Test mode: not submitting to Firestore.");
+      showToast("Test mode: submission skipped.");
 
-      source: "blood_request_form",
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    });
+      console.log("Payload:", {
+        ...getDefaultJobData(),
+        ...payload,
 
-    const ref = await addDoc(collection(db, "blood_requests"), {
+        source: "blood_request_form",
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+
+      return;
+    }
+
+    const ref = await addDoc(collection(db, APP_CONFIG.COLLECTION_NAME), {
       ...getDefaultJobData(),
       ...payload,
 
