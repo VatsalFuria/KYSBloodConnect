@@ -173,7 +173,11 @@
             <div class="sheet-subtitle">
                 <span id="sheet-status-badge" class="status-badge"></span>
             </div>
+
+            
         </div>
+
+        <button id="btn-edit-sheet" class="icon-btn" aria-label="Edit">✏️</button>
 
         <button id="btn-close-sheet" class="icon-btn" aria-label="Close">
 
@@ -197,12 +201,18 @@
 
         </button>
 
+        
     </div>
 
     <!-- Generated from DETAIL_SCHEMA -->
     <div
         id="sheet-content"
         class="sheet-body">
+    </div>
+
+    <div id="sheet-edit-bar" class="sheet-edit-bar hidden">
+      <button id="btn-save-edit" class="btn btn-primary">Save</button>
+      <button id="btn-cancel-edit" class="btn btn-outline">Cancel</button>
     </div>
 
     <!-- Quick Actions -->

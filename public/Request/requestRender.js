@@ -1,6 +1,5 @@
 import { REQUEST_SCHEMA } from "../config/requestSchema.js";
 
-const DEBUGGING = false;
 const container = document.getElementById("formContainer");
 
 const renderers = {
@@ -26,12 +25,10 @@ function renderForm(schema, container) {
     section.fields.forEach((field) => {
       const element = renderField(field);
 
-      if (DEBUGGING) {
-        console.log(field.id, element);
-        console.log(field.type, element);
-      }
-
-      if (element) sectionDiv.appendChild(element);
+      if (element){
+        // console.log("element", element);
+        sectionDiv.appendChild(element);
+      } 
     });
 
     form.appendChild(sectionDiv);

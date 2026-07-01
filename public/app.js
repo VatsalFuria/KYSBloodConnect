@@ -192,12 +192,20 @@ function renderCard(req) {
       <span class="card-heading1">${esc(title)}</span>
       <span class="status-badge status-${req.status}">${statusLabel(req.status)}</span>
     </div>
+
+    <div class="card-badges">
+      ${req.bloodGroup.includes("-") ? `<span class="urgency-badge urgency-urgent">${esc(req.bloodGroup)}</span>` : ""}
+    </div>
+
+
     <div class="card-meta">
       <span class="card-heading2">${esc(subtitle)}</span>
-      ${req.bloodGroup.includes("-") ? `<span class="urgency-badge urgency-urgent">${esc(req.bloodGroup)}</span>` : ""}
-      <span class="card-time">${timeAgo(req.createdAt?.toDate?.())}</span>
     </div>
-    ${req.claimedBy ? `<div class="card-claimedBy">Claimed by ${esc(req.claimedBy)}</div>` : ""}
+
+    <div class="card-footer">
+      <span class="card-time">${timeAgo(req.createdAt?.toDate?.())}</span>
+      ${req.claimedBy ? `<div class="card-claimedBy">👤 ${esc(req.claimedBy)}</div>` : ""}
+    </div>
   `;
 }
 
@@ -352,20 +360,26 @@ function renderSchemaSections(sections, job) {
 
 function createDetailRow(field, value) {
   const row = document.createElement("div");
-  row.className = "detail-row";
+  row.className = "detail-row" + (isLong(field) ? " full-width" : "");
+  row.dataset.fieldId = field.id;
 
   const label = document.createElement("div");
   label.className = "detail-label";
   label.textContent = field.label;
 
-  const content = document.createElement("div");
-  content.className = "detail-value";
-  content.textContent = value;
+  const display = document.createElement("div");
+  const raw = value;
+  display.className = "detail-value" + (raw === "—" ? " empty" : "");
+  display.textContent = raw;
 
   row.appendChild(label);
-  row.appendChild(content);
+  row.appendChild(display);
 
   return row;
+}
+
+function isLong(field) {
+  return field.type === "textarea" || field.id === "hospitalName" || field.id === "requiredBefore";
 }
 
 function formatField(value, field) {
@@ -703,3 +717,83 @@ function timeAgo(date) {
   if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
   return `${Math.floor(seconds / 86400)}d ago`;
 }
+
+// app.js — edit mode
+import { renderInput } from "./config/fieldRenderers.js";
+
+let editing = false;
+const btnEditSheet = document.getElementById("btn-edit-sheet");
+const editBar = document.getElementById("sheet-edit-bar");
+const editableFields = getAllRequestSchemaFields(REQUEST_SCHEMA); // volunteer can edit request fields
+
+btnEditSheet.addEventListener("click", () => {
+  editing ? cancelEdit() : enterEdit();
+});
+
+function enterEdit() {
+  if (!activeRequest) return;
+  editing = true;
+  editBar.classList.remove("hidden");
+
+  editableFields.forEach(field => {
+    const row = document.querySelector(`.detail-row[data-field-id="${field.id}"]`);
+    if (!row) return;
+    row.classList.add("editing");
+    const html = renderInput(field, activeRequest[field.id]);
+    if (!html) return; // e.g. file fields
+    const wrap = document.createElement("div");
+    wrap.innerHTML = html;
+    row.appendChild(wrap.firstElementChild);
+  });
+}
+
+function cancelEdit() {
+  editing = false;
+  editBar.classList.add("hidden");
+  document.querySelectorAll(".detail-row.editing").forEach(row => {
+    row.classList.remove("editing");
+    row.querySelectorAll("input, select, textarea, .counter").forEach(el => el.remove());
+  });
+}
+
+document.getElementById("btn-cancel-edit").addEventListener("click", cancelEdit);
+
+document.getElementById("btn-save-edit").addEventListener("click", async () => {
+  const updates = {};
+  editableFields.forEach(field => {
+    const el = document.getElementById(`edit-${field.id}`);
+    if (!el) return;
+    if (field.type === "counter") {
+      updates[field.id] = parseInt(el.textContent, 10);
+    } else if (field.type === "number") {
+      updates[field.id] = el.value === "" ? null : parseInt(el.value, 10);
+    } else if (field.type === "datetime") {
+      updates[field.id] = el.value ? Timestamp.fromDate(new Date(el.value)) : null;
+    } else {
+      updates[field.id] = el.value.trim();
+    }
+  });
+
+  try {
+    await updateDoc(doc(db, APP_CONFIG.COLLECTION_NAME, activeRequest.id), {
+      ...updates,
+      updatedAt: serverTimestamp(),
+    });
+    showToast("Request updated");
+    cancelEdit();
+    closeSheet();
+  } catch (e) {
+    showToast("Update failed: " + e.message);
+  }
+});
+
+// counter +/- inside edit mode
+document.addEventListener("click", e => {
+  const btn = e.target.closest("[data-edit-counter]");
+  if (!btn) return;
+  const span = document.getElementById(`edit-${btn.dataset.editCounter}`);
+  const delta = btn.dataset.action === "plus" ? 1 : -1;
+  span.textContent = Math.max(0, parseInt(span.textContent, 10) + delta);
+});
+
+btnEditSheet.classList.toggle("hidden", activeRequest.status === "claimed");
