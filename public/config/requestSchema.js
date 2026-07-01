@@ -30,6 +30,7 @@ export const REQUEST_SCHEMA = {
           required: true,
           default: "",
           placeholder: "Full name of the patient",
+          card: { role: "title", order: 1 },
         },
 
         {
@@ -59,6 +60,7 @@ export const REQUEST_SCHEMA = {
           options: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
           required: true,
           default: "",
+          card: { role: "title", order: 1, urgentIf: v => v.includes("-") },
         },
 
         {
@@ -95,6 +97,7 @@ export const REQUEST_SCHEMA = {
           required: true,
           default: "",
           placeholder: "Name of the hospital where patient is admitted",
+          card: { role: "subtitle", order: 1 },
         },
 
         {
@@ -105,6 +108,7 @@ export const REQUEST_SCHEMA = {
           options: ["North", "South", "East", "West"], //NEED TO POPULATE OPTIONS
           required: true,
           default: "",
+          card: { role: "title", order: 2 },   // same role = joined into one line
         },
 
         {

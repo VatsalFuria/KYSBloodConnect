@@ -1,5 +1,10 @@
 import { FIREBASE_CONFIG, VAPID_KEY, APP_CONFIG } from "./firebase-config.js";
-import { JOB_SCHEMA, createJob, createTestJob } from "./config/jobSchema.js";
+import {
+  JOB_SCHEMA,
+  createJob,
+  createTestJob,
+  getCardFields,
+} from "./config/jobSchema.js";
 import { REQUEST_SCHEMA } from "./config/requestSchema.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
@@ -162,30 +167,38 @@ function renderList() {
   filtered.forEach((req) => {
     const card = document.createElement("div");
     card.className = `card card-${req.status}`;
-    card.innerHTML = `
-      <div class="card-top">
-
-        <span class="card-heading1">${esc(req.patientName + "  |  " + req.area)}</span>
-
-        <span class="status-badge status-${req.status}">${statusLabel(req.status)}</span>
-
-      </div>
-
-      <div class="card-meta">
-
-        <span class="card-heading2">${esc(req.bloodGroup + "  |  " + req.hospitalName)}</span>
-
-        ${req.bloodGroup.includes("-") ? `<span class="urgency-badge urgency-urgent">${esc(req.bloodGroup)}</span>` : ""}
-
-        <span class="card-time">${timeAgo(req.createdAt?.toDate?.() || new Date())}</span>
-
-      </div>
-
-      ${req.claimedBy ? `<div class="card-claimedBy">Claimed by ${esc(req.claimedBy)}</div>` : ""}
-    `;
+    card.innerHTML = renderCard(req);
     card.addEventListener("click", () => openSheet(req.id));
     cardsWrap.appendChild(card);
   });
+}
+
+function renderCard(req) {
+  const fields = getCardFields();
+  if (APP_CONFIG.TEST) console.log("Card fields:", fields);
+  const byRole = Object.groupBy(fields, (f) => f.card.role);
+
+  const title = (byRole.title || []).map((f) => req[f.id]).join("  |  ");
+  const subtitle = (byRole.subtitle || []).map((f) => req[f.id]).join("  |  ");
+  // const badges = (byRole.badge||[])
+  //   .filter(f=>req[f.id])
+  //   .map(f=>{
+  //     const urgent = f.card.urgentIf?.(req[f.id]);
+  //     return `<span class="urgency-badge ${urgent?'urgency-urgent':''}">${esc(req[f.id])}</span>`;
+  //   }).join("");
+
+  return `
+    <div class="card-top">
+      <span class="card-heading1">${esc(title)}</span>
+      <span class="status-badge status-${req.status}">${statusLabel(req.status)}</span>
+    </div>
+    <div class="card-meta">
+      <span class="card-heading2">${esc(subtitle)}</span>
+      ${req.bloodGroup.includes("-") ? `<span class="urgency-badge urgency-urgent">${esc(req.bloodGroup)}</span>` : ""}
+      <span class="card-time">${timeAgo(req.createdAt?.toDate?.())}</span>
+    </div>
+    ${req.claimedBy ? `<div class="card-claimedBy">Claimed by ${esc(req.claimedBy)}</div>` : ""}
+  `;
 }
 
 document.querySelectorAll(".tab").forEach((tab) => {
@@ -282,7 +295,7 @@ function openSheet(requestId) {
       {
         id: "workflow",
         title: "Volunteer Workflow",
-        fields: [JOB_SCHEMA],
+        fields: JOB_SCHEMA.filter((f) => f.detailVisible !== false),
       },
     ],
     job,

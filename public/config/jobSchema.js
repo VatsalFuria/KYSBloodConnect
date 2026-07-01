@@ -39,7 +39,8 @@ export const JOB_SCHEMA = [
         type: "text",
         dataType: "string",
         required: false,
-        default: null
+        default: null,
+        detailVisible: false,
     },
 
     {
@@ -134,7 +135,8 @@ export const JOB_SCHEMA = [
         type: "text",
         dataType: "string",
         required: false,
-        default: null
+        default: null,
+        detailVisible: false,
     },
 
     {
@@ -170,6 +172,7 @@ export function getDefaultJobData(){
     const data = {};
 
     // Request fields
+    // console.log("Request fields:", getAllRequestSchemaFields());
     for (const field of getAllRequestSchemaFields()) {
         data[field.id] = field.default ?? null;
     }
@@ -179,6 +182,7 @@ export function getDefaultJobData(){
         data[field.id] = field.default;
     }
 
+    // console.log("Default job data:", data);
     return data;
 }
 
@@ -245,4 +249,8 @@ export function createTestJob(id, status, claimedBy = null, claimedByUid = null)
         claimedBy,
         claimedByUid,
     }
+}
+
+export function getCardFields() {
+  return getAllRequestSchemaFields().filter(f => f.card).sort((a,b)=>a.card.order-b.card.order);
 }
