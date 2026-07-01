@@ -52,22 +52,23 @@ export const JOB_SCHEMA = [
         default: null
     },
 
-    {
-        id: "bloodBankId",
-        label: "Blood Bank ID",
-        type: "text",
-        dataType: "string",
-        required: false,
-        default: null
-    },
+    // {
+    //     id: "bloodBankId",
+    //     label: "Blood Bank ID",
+    //     type: "text",
+    //     dataType: "string",
+    //     required: false,
+    //     default: null
+    // },
 
     {
         id: "bloodBankName",
         label: "Blood Bank",
-        type: "text",
+        type: "select",
         dataType: "string",
         required: false,
         default: null,
+        editable: true,
         options: [
             "BB1",
             "BB2",

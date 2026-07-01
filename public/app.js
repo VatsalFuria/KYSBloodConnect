@@ -320,6 +320,8 @@ function openSheet(requestId) {
     )}`;
 
   renderActions(job);
+  // btnEditSheet.classList.toggle("hidden", job.status !== "claimed" || job.claimedByUid !== currentUser?.uid);
+btnEditSheet.classList.toggle("hidden", job.status === "done");
 
   sheetOverlay.classList.remove("hidden");
   detailSheet.classList.remove("hidden");
@@ -720,12 +722,16 @@ function timeAgo(date) {
 
 // app.js — edit mode
 import { renderInput } from "./config/fieldRenderers.js";
+import { getAllRequestSchemaFields } from "./config/requestSchema.js";
+import { Timestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 let editing = false;
 const btnEditSheet = document.getElementById("btn-edit-sheet");
 const editBar = document.getElementById("sheet-edit-bar");
-const editableFields = getAllRequestSchemaFields(REQUEST_SCHEMA); // volunteer can edit request fields
-
+const editableFields = [
+  ...getAllRequestSchemaFields(),
+  ...JOB_SCHEMA.filter(f => f.editable === true),
+];
 btnEditSheet.addEventListener("click", () => {
   editing ? cancelEdit() : enterEdit();
 });
@@ -759,6 +765,8 @@ function cancelEdit() {
 document.getElementById("btn-cancel-edit").addEventListener("click", cancelEdit);
 
 document.getElementById("btn-save-edit").addEventListener("click", async () => {
+  if (!activeRequest) return;
+
   const updates = {};
   editableFields.forEach(field => {
     const el = document.getElementById(`edit-${field.id}`);
@@ -774,7 +782,24 @@ document.getElementById("btn-save-edit").addEventListener("click", async () => {
     }
   });
 
+  const btnSave = document.getElementById("btn-save-edit");
+  btnSave.disabled = true;
+  btnSave.textContent = "Saving...";
+
   try {
+    if (APP_CONFIG.TEST) {
+      // Offline/test mode: mutate local state instead of touching Firestore.
+      console.log("Test mode: skipping Firestore update. Updates:", updates);
+      Object.assign(activeRequest, updates, { updatedAt: Timestamp.fromDate(new Date()) });
+      const idx = allRequests.findIndex(r => r.id === activeRequest.id);
+      if (idx !== -1) allRequests[idx] = { ...allRequests[idx], ...updates };
+      showToast("Test mode: request updated locally");
+      cancelEdit();
+      renderList();
+      closeSheet();
+      return;
+    }
+
     await updateDoc(doc(db, APP_CONFIG.COLLECTION_NAME, activeRequest.id), {
       ...updates,
       updatedAt: serverTimestamp(),
@@ -784,6 +809,9 @@ document.getElementById("btn-save-edit").addEventListener("click", async () => {
     closeSheet();
   } catch (e) {
     showToast("Update failed: " + e.message);
+  } finally {
+    btnSave.disabled = false;
+    btnSave.textContent = "Save";
   }
 });
 
@@ -795,5 +823,3 @@ document.addEventListener("click", e => {
   const delta = btn.dataset.action === "plus" ? 1 : -1;
   span.textContent = Math.max(0, parseInt(span.textContent, 10) + delta);
 });
-
-btnEditSheet.classList.toggle("hidden", activeRequest.status === "claimed");
