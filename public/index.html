@@ -86,7 +86,7 @@
 </div>
 
 <div id="sheet-overlay" class="sheet-overlay hidden"></div>
-
+<!-- 
 <div id="detail-sheet" class="detail-sheet hidden">
   <div class="sheet-handle"></div>
 
@@ -159,6 +159,114 @@
       <textarea id="completion-notes" class="textarea" rows="3" placeholder="What was done, any follow-up needed..."></textarea>
     </div>
   </div>
+</div> -->
+
+<div id="detail-sheet" class="detail-sheet hidden">
+    <div class="sheet-handle"></div>
+
+    <!-- Header -->
+    <div class="sheet-header">
+
+        <div class="sheet-header-info">
+            <h2 id="sheet-title"></h2>
+
+            <div class="sheet-subtitle">
+                <span id="sheet-status-badge" class="status-badge"></span>
+            </div>
+        </div>
+
+        <button id="btn-close-sheet" class="icon-btn" aria-label="Close">
+
+            <svg width="20"
+                 height="20"
+                 viewBox="0 0 24 24"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="2">
+
+                <line x1="18" y1="6"
+                      x2="6"
+                      y2="18"></line>
+
+                <line x1="6"
+                      y1="6"
+                      x2="18"
+                      y2="18"></line>
+
+            </svg>
+
+        </button>
+
+    </div>
+
+    <!-- Generated from DETAIL_SCHEMA -->
+    <div
+        id="sheet-content"
+        class="sheet-body">
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="contact-row">
+
+        <a
+            id="btn-call"
+            href="#"
+            class="btn btn-outline btn-contact">
+
+            Call
+
+        </a>
+
+        <a
+            id="btn-whatsapp"
+            href="#"
+            target="_blank"
+            class="btn btn-outline btn-contact">
+
+            WhatsApp
+
+        </a>
+
+        <a
+            id="btn-maps"
+            href="#"
+            target="_blank"
+            class="btn btn-outline btn-contact">
+
+            Maps
+
+        </a>
+
+    </div>
+
+    <!-- Workflow Actions -->
+    <div
+        id="action-area"
+        class="action-area">
+    </div>
+
+    <!-- Completion Notes -->
+    <div
+        id="completion-notes-wrap"
+        class="hidden">
+
+        <label
+            class="field-label"
+            for="completion-notes">
+
+            Completion Notes
+
+        </label>
+
+        <textarea
+            id="completion-notes"
+            class="textarea"
+            rows="3"
+            placeholder="What was done?">
+        </textarea>
+
+    </div>
+
 </div>
 
 <div id="toast" class="toast hidden"></div>

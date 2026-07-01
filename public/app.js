@@ -1,5 +1,6 @@
 import { FIREBASE_CONFIG, VAPID_KEY, APP_CONFIG } from "./firebase-config.js";
-import { createJob, createTestJob } from "./config/jobSchema.js";
+import { JOB_SCHEMA, createJob, createTestJob } from "./config/jobSchema.js";
+import { REQUEST_SCHEMA } from "./config/requestSchema.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getAuth,
@@ -80,12 +81,14 @@ onAuthStateChanged(auth, async (user) => {
     if (APP_CONFIG.TEST) {
       showScreen("app");
       console.log("TEST MODE: creating a test job");
-      allRequests = [createTestJob("open", null, null), createTestJob("claimed", "Test Volunteer", "test-volunteer-uid"),];
+      allRequests = [
+        createTestJob(1, "open", null, null),
+        createTestJob(2, "claimed", "Test Volunteer", "test-volunteer-uid"),
+      ];
       console.log("Test job created:", allRequests);
       renderList();
       updateBadge();
     }
-
   }
 });
 
@@ -136,7 +139,11 @@ function renderList() {
       ? allRequests
       : allRequests.filter((r) => {
           if (activeFilter === "active") {
-            return r.status === "open" || r.status === "claimed" || r.status === "on_the_way";
+            return (
+              r.status === "open" ||
+              r.status === "claimed" ||
+              r.status === "on_the_way"
+            );
           }
           // else if (activeFilter === "claimed") {
           //   return r.status === "claimed" || r.status === "on_the_way";
@@ -201,55 +208,166 @@ function updateBadge() {
   badgeCount.classList.toggle("hidden", openCount === 0);
 }
 
-/**
- * Opens the detail sheet for a selected request.
- * enables Volunteer actions
- */
+// /**
+//  * Opens the detail sheet for a selected request.
+//  * enables Volunteer actions
+//  */
+// function openSheet(requestId) {
+//   const req = allRequests.find((r) => r.id === requestId);
+
+//   if (!req) return;
+//   activeRequest = req;
+
+//   document.getElementById("d-type").textContent = req.bloodGroup;
+//   const urgBadge = document.getElementById("d-urgency-badge");
+//   urgBadge.textContent = req.urgency === "urgent" ? "Urgent" : "Normal";
+//   urgBadge.className = `urgency-badge urgency-${req.urgency}`;
+
+//   document.getElementById("d-name").textContent = req.patientName;
+//   document.getElementById("d-phone").textContent = req.primaryMobile;
+//   document.getElementById("d-address").textContent = req.area + ", " + req.hospitalName;
+
+//   const notesRow = document.getElementById("d-notes-row");
+//   if (req.remarks) {
+//     document.getElementById("d-notes").textContent = req.remarks;
+//     notesRow.classList.remove("hidden");
+//   } else {
+//     notesRow.classList.add("hidden");
+//   }
+
+//   const claimedRow = document.getElementById("d-claimed-row");
+//   if (req.claimedBy) {
+//     document.getElementById("d-claimed-by").textContent = req.claimedBy;
+//     claimedRow.classList.remove("hidden");
+//   } else {
+//     claimedRow.classList.add("hidden");
+//   }
+
+//   document.getElementById("btn-call").href = `tel:${req.primaryMobile}`;
+//   document.getElementById("btn-maps").href =
+//     `https://maps.google.com/?q=${encodeURIComponent(req.area + ", " + req.hospitalName)}`;
+//   document.getElementById("btn-whatsapp").href =
+//     `https://wa.me/91${req.primaryMobile.replace(/\D/g, "")}`;
+
+//   renderActions(req);
+
+//   sheetOverlay.classList.remove("hidden");
+//   detailSheet.classList.remove("hidden");
+//   requestAnimationFrame(() => {
+//     sheetOverlay.classList.add("visible");
+//     detailSheet.classList.add("visible");
+//   });
+// }
+
 function openSheet(requestId) {
-  const req = allRequests.find((r) => r.id === requestId);
+  const job = allRequests.find((r) => r.id === requestId);
 
-  if (!req) return;
-  activeRequest = req;
+  if (!job) return;
 
-  document.getElementById("d-type").textContent = req.bloodGroup;
-  const urgBadge = document.getElementById("d-urgency-badge");
-  urgBadge.textContent = req.urgency === "urgent" ? "Urgent" : "Normal";
-  urgBadge.className = `urgency-badge urgency-${req.urgency}`;
+  activeRequest = job;
 
-  document.getElementById("d-name").textContent = req.patientName;
-  document.getElementById("d-phone").textContent = req.primaryMobile;
-  document.getElementById("d-address").textContent = req.area + ", " + req.hospitalName;
+  document.getElementById("sheet-title").textContent =
+    `${job.bloodGroup} Blood Request`;
 
-  const notesRow = document.getElementById("d-notes-row");
-  if (req.remarks) {
-    document.getElementById("d-notes").textContent = req.remarks;
-    notesRow.classList.remove("hidden");
-  } else {
-    notesRow.classList.add("hidden");
-  }
+  const badge = document.getElementById("sheet-status-badge");
 
-  const claimedRow = document.getElementById("d-claimed-row");
-  if (req.claimedBy) {
-    document.getElementById("d-claimed-by").textContent = req.claimedBy;
-    claimedRow.classList.remove("hidden");
-  } else {
-    claimedRow.classList.add("hidden");
-  }
+  badge.className = `status-badge status-${job.status}`;
 
-  document.getElementById("btn-call").href = `tel:${req.primaryMobile}`;
-  document.getElementById("btn-maps").href =
-    `https://maps.google.com/?q=${encodeURIComponent(req.area + ", " + req.hospitalName)}`;
+  badge.textContent = statusLabel(job.status);
+
+  renderSchemaSections(REQUEST_SCHEMA.sections, job);
+
+  renderSchemaSections(
+    [
+      {
+        id: "workflow",
+        title: "Volunteer Workflow",
+        fields: [JOB_SCHEMA],
+      },
+    ],
+    job,
+  );
+
+  document.getElementById("btn-call").href = `tel:${job.primaryMobile}`;
+
   document.getElementById("btn-whatsapp").href =
-    `https://wa.me/91${req.primaryMobile.replace(/\D/g, "")}`;
+    `https://wa.me/91${job.primaryMobile.replace(/\D/g, "")}`;
 
-  renderActions(req);
+  document.getElementById("btn-maps").href =
+    `https://maps.google.com/?q=${encodeURIComponent(
+      `${job.hospitalName}, ${job.area}`,
+    )}`;
+
+  renderActions(job);
 
   sheetOverlay.classList.remove("hidden");
   detailSheet.classList.remove("hidden");
+
   requestAnimationFrame(() => {
     sheetOverlay.classList.add("visible");
     detailSheet.classList.add("visible");
   });
+}
+
+function renderSchemaSections(sections, job) {
+  const container = document.getElementById("sheet-content");
+
+  for (const section of sections) {
+    const sectionEl = document.createElement("section");
+
+    sectionEl.className = "detail-section";
+
+    sectionEl.innerHTML = `<h3 class="detail-section-title">
+                ${section.title}
+            </h3>`;
+
+    const grid = document.createElement("div");
+
+    grid.className = "detail-grid";
+
+    for (const field of section.fields) {
+      grid.appendChild(
+        createDetailRow(field, formatField(job[field.id], field)),
+      );
+    }
+
+    sectionEl.appendChild(grid);
+
+    container.appendChild(sectionEl);
+  }
+}
+
+function createDetailRow(field, value) {
+  const row = document.createElement("div");
+  row.className = "detail-row";
+
+  const label = document.createElement("div");
+  label.className = "detail-label";
+  label.textContent = field.label;
+
+  const content = document.createElement("div");
+  content.className = "detail-value";
+  content.textContent = value;
+
+  row.appendChild(label);
+  row.appendChild(content);
+
+  return row;
+}
+
+function formatField(value, field) {
+  if (value === null || value === undefined || value === "") return "—";
+
+  switch (field.dataType) {
+    case "timestamp":
+      if (value.toDate) value = value.toDate();
+      else if (value.seconds) value = new Date(value.seconds * 1000);
+
+      return value.toLocaleString();
+
+    default:
+      return String(value);
+  }
 }
 
 /**

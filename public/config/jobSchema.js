@@ -8,30 +8,161 @@ import { Timestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-f
  * These are NOT part of the public request form.
  */
 export const JOB_SCHEMA = [
-    { id: "status", defaultValue: "open" },
+    {
+        id: "status",
+        label: "Status",
+        type: "select",
+        dataType: "string",
+        required: true,
+        default: "open",
+        options: [
+            "open",
+            "claimed",
+            "on_the_way",
+            "done",
+            "rejected"
+        ]
+    },
 
-    { id: "claimedBy", defaultValue: null },
-    { id: "claimedByUid", defaultValue: null },
-    { id: "claimedAt", defaultValue: null },
+    {
+        id: "claimedBy",
+        label: "Claimed By",
+        type: "text",
+        dataType: "string",
+        required: false,
+        default: null
+    },
 
-    { id: "bloodBankId", defaultValue: null },
-    { id: "bloodBankName", defaultValue: null },
+    {
+        id: "claimedByUid",
+        label: "Claimed By UID",
+        type: "text",
+        dataType: "string",
+        required: false,
+        default: null
+    },
 
-    // { id: "pcvUnits", defaultValue: 0 },
-    // { id: "ffpUnits", defaultValue: 0 },
-    // { id: "sdpUnits", defaultValue: 0 },
+    {
+        id: "claimedAt",
+        label: "Claimed At",
+        type: "datetime",
+        dataType: "timestamp",
+        required: false,
+        default: null
+    },
 
-    { id: "completionNotes", defaultValue: "" },
-    { id: "completedAt", defaultValue: null },
-    { id: "source", defaultValue: null},
-    { id: "createdAt", defaultValue: null},
-    { id: "updatedAt", defaultValue: null},
+    {
+        id: "bloodBankId",
+        label: "Blood Bank ID",
+        type: "text",
+        dataType: "string",
+        required: false,
+        default: null
+    },
 
-    { id: "rejectedBy", defaultValue: null },
-    { id: "rejectedByUid", defaultValue: null },
-    { id: "rejectedAt", defaultValue: null },
-    { id: "rejectionReason", defaultValue: null },
-    { id: "rejectionNote", defaultValue: "" }
+    {
+        id: "bloodBankName",
+        label: "Blood Bank",
+        type: "text",
+        dataType: "string",
+        required: false,
+        default: null,
+        options: [
+            "BB1",
+            "BB2",
+            "BB3",
+        ]
+    },
+
+    {
+        id: "completionNotes",
+        label: "Completion Notes",
+        type: "textarea",
+        dataType: "string",
+        required: false,
+        default: ""
+    },
+
+    {
+        id: "completedAt",
+        label: "Completed At",
+        type: "datetime",
+        dataType: "timestamp",
+        required: false,
+        default: null
+    },
+
+    {
+        id: "source",
+        label: "Source",
+        type: "text",
+        dataType: "string",
+        required: false,
+        default: null
+    },
+
+    {
+        id: "createdAt",
+        label: "Created At",
+        type: "datetime",
+        dataType: "timestamp",
+        required: false,
+        default: null
+    },
+
+    {
+        id: "updatedAt",
+        label: "Updated At",
+        type: "datetime",
+        dataType: "timestamp",
+        required: false,
+        default: null
+    },
+
+    {
+        id: "rejectedBy",
+        label: "Rejected By",
+        type: "text",
+        dataType: "string",
+        required: false,
+        default: null
+    },
+
+    {
+        id: "rejectedByUid",
+        label: "Rejected By UID",
+        type: "text",
+        dataType: "string",
+        required: false,
+        default: null
+    },
+
+    {
+        id: "rejectedAt",
+        label: "Rejected At",
+        type: "datetime",
+        dataType: "timestamp",
+        required: false,
+        default: null
+    },
+
+    {
+        id: "rejectionReason",
+        label: "Rejection Reason",
+        type: "text",
+        dataType: "string",
+        required: false,
+        default: null
+    },
+
+    {
+        id: "rejectionNote",
+        label: "Rejection Note",
+        type: "textarea",
+        dataType: "string",
+        required: false,
+        default: ""
+    }
 ];
 
 
@@ -45,7 +176,7 @@ export function getDefaultJobData(){
 
     // Workflow fields
     for (const field of JOB_SCHEMA) {
-        data[field.id] = field.defaultValue;
+        data[field.id] = field.default;
     }
 
     return data;
@@ -62,11 +193,7 @@ export function createJob(id, firestoreData) {
     };
 }
 
-export function createTestJob(status, claimedBy = null, claimedByUid = null) {
-    return {
-        id: "test",
-
-        ...{    "patientName": "Test_Name",
+const testJobData = {    "patientName": "Test_Name",
                 "gender": "Male",
                 "age": 80,
                 "bloodGroup": "A-",
@@ -87,10 +214,10 @@ export function createTestJob(status, claimedBy = null, claimedByUid = null) {
                   "nanoseconds": 0
                 },
             
-                "status": status,
+                "status": null,
             
-                "claimedBy": claimedBy,
-                "claimedByUid": claimedByUid,
+                "claimedBy": null,
+                "claimedByUid": null,
                 "claimedAt": null,
             
                 "bloodBankId": null,
@@ -109,6 +236,13 @@ export function createTestJob(status, claimedBy = null, claimedByUid = null) {
                 "rejectedAt": null,
                 "rejectionReason": null,
                 "rejectionNote": ""
-            }               
-        }
-    };
+            };
+
+export function createTestJob(id, status, claimedBy = null, claimedByUid = null) {
+    return {
+        ...createJob(id, testJobData),
+        status,
+        claimedBy,
+        claimedByUid,
+    }
+}
