@@ -32,9 +32,6 @@ const app = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-connectAuthEmulator(auth, "http://localhost:9099");
-connectFirestoreEmulator(db, "localhost", 8080);
-
 let currentUser = null;
 let allRequests = [];
 let activeFilter = "active";

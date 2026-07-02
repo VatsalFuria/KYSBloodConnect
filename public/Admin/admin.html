@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#1a56db"/>
+  <title>Admin — KYS Blood Connect</title>
+  <link rel="stylesheet" href="../app.css"/>
+  <link rel="stylesheet" href="admin.css"/>
+</head>
+<body>
+
+  <div id="screen-auth" class="screen active admin-shell">
+    <div class="auth-wrap">
+      <h1>Admin Console</h1>
+      <p class="auth-sub">Sign in with an authorized admin Google account.</p>
+      <button id="btn-google-signin" class="btn btn-primary btn-lg">Sign in with Google</button>
+    </div>
+  </div>
+
+  <div id="screen-denied" class="screen admin-shell">
+    <div class="auth-wrap">
+      <h1>Not authorized</h1>
+      <p class="auth-sub">This account is not registered as an admin.</p>
+      <button id="btn-signout-denied" class="btn btn-outline">Sign out</button>
+    </div>
+  </div>
+
+  <div id="screen-admin" class="screen admin-shell">
+    <header class="topbar">
+      <span class="topbar-title">Admin</span>
+      <button id="btn-signout" class="icon-btn" title="Sign out">Sign out</button>
+    </header>
+
+    <main class="admin-main">
+
+      <!-- 1. Volunteer approvals -->
+      <section class="admin-section">
+        <h2>Pending Volunteers</h2>
+        <p class="admin-hint">Volunteers can't see any requests until approved here.</p>
+        <div id="pending-volunteers" class="admin-table-wrap"></div>
+      </section>
+
+      <!-- 2. Reject requests -->
+      <section class="admin-section">
+        <h2>Open Requests</h2>
+        <p class="admin-hint">Reject requests that are duplicate, already resolved, or unreachable.</p>
+        <div id="open-requests" class="admin-table-wrap"></div>
+      </section>
+
+      <!-- 3. Analytics / Archive / Export -->
+      <section class="admin-section">
+        <h2>Analytics &amp; Archive</h2>
+        <div class="admin-actions-row">
+          <button id="btn-load-analytics" class="btn btn-outline">Load analytics</button>
+          <button id="btn-export-csv" class="btn btn-outline" disabled>Export CSV</button>
+          <button id="btn-export-json" class="btn btn-outline" disabled>Export JSON</button>
+          <button id="btn-clear-archived" class="btn btn-danger" disabled>Clear done/rejected requests</button>
+        </div>
+        <div id="analytics-output" class="analytics-grid"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Reject reason modal -->
+  <div id="reject-overlay" class="sheet-overlay hidden"></div>
+  <div id="reject-sheet" class="detail-sheet hidden">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-header-info"><h2>Reject request</h2></div>
+    </div>
+    <div class="sheet-body">
+      <label class="field-label" for="reject-reason">Reason</label>
+      <select id="reject-reason" class="text-input">
+        <option value="Already resolved">Already resolved</option>
+        <option value="Duplicate request">Duplicate request</option>
+        <option value="Unable to verify">Unable to verify</option>
+        <option value="Requester unreachable">Requester unreachable</option>
+        <option value="Out of service area">Out of service area</option>
+        <option value="Other">Other</option>
+      </select>
+      <label class="field-label" for="reject-note">Note (optional, required if "Other")</label>
+      <textarea id="reject-note" class="textarea" rows="3" maxlength="500"></textarea>
+    </div>
+    <div class="sheet-edit-bar">
+      <button id="btn-confirm-reject" class="btn btn-danger">Reject</button>
+      <button id="btn-cancel-reject" class="btn btn-outline">Cancel</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script type="module" src="admin.js"></script>
+</body>
+</html>
