@@ -15,28 +15,21 @@ const VAPID_KEY =
 // Free-plan-safe feature flags. Keep risky/expensive integrations disabled by default.
 const APP_CONFIG = {
   ENABLE_PUBLIC_INTAKE: true,
-  ENABLE_ACCESS_CODE_MODE: false,
-  INTAKE_ACCESS_CODE: "",
+
   ENABLE_FCM: false,
   ENABLE_ALERT_RELAY: false,
   ENABLE_EMAIL_ALERTS: false,
   ENABLE_TELEGRAM_ALERTS: false,
   ALERT_RELAY_URL: "",
   ALERT_RELAY_SECRET: "",
+
   PUBLIC_SUBMISSION_COOLDOWN_SECONDS: 300,
   MAX_ACTIVE_REQUESTS_QUERY: 50,
   LIMIT_REQUEST_QUERY: true,
-  REQUEST_TYPES: [
-    "Medicine delivery",
-    "Food assistance",
-    "Home visit",
-    "Groceries",
-    "Documents",
-    "Other",
-  ],
   TOAST_DURATION: 8, // seconds
   COLLECTION_NAME: "blood_requests", //ALSO CHANGE IN FIRESTORE RULES
-  TEST: true,
+
+  TEST: false,
 };
 
 export { FIREBASE_CONFIG, VAPID_KEY, APP_CONFIG };
