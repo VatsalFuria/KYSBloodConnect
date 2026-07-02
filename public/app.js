@@ -17,6 +17,7 @@ import {
 import {
   collection,
   doc,
+  getDoc,
   getFirestore,
   limit,
   onSnapshot,
@@ -72,7 +73,8 @@ btnSignout.addEventListener("click", () => {
 onAuthStateChanged(auth, async (user) => {
   currentUser = user;
   if (user) {
-    if (checkVolunteerAccess(user)) {
+    const approved = await ensureVolunteerProfileAndCheckApproval(user);
+    if (approved) {
       showScreen("app");
       startListening();
       maybeShowAlertBanner();
@@ -82,7 +84,6 @@ onAuthStateChanged(auth, async (user) => {
     }
   } else {
     showScreen("auth");
-
     if (APP_CONFIG.TEST) {
       showScreen("app");
       console.log("TEST MODE: creating a test job");
@@ -90,7 +91,6 @@ onAuthStateChanged(auth, async (user) => {
         createTestJob(1, "open", null, null),
         createTestJob(2, "claimed", "Test Volunteer", "test-volunteer-uid"),
       ];
-      console.log("Test job created:", allRequests);
       renderList();
       updateBadge();
     }
@@ -98,11 +98,29 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 /**
- * Checks whether the signed-in user can access the volunteer dashboard.
+ * Ensures a volunteers/{uid} profile doc exists, creating one on first
+ * sign-in, and returns whether this volunteer is admin-approved.
+ * New profiles are unapproved by default (rules block self-approval).
  */
-function checkVolunteerAccess(user) {
-  //check if admin has provided access, else add in requests for admin to approve
-  return true;
+async function ensureVolunteerProfileAndCheckApproval(user) {
+  const ref = doc(db, "volunteers", user.uid);
+  try {
+    const snap = await getDoc(ref);
+    if (!snap.exists()) {
+      await setDoc(ref, {
+        displayName: user.displayName || "",
+        email: user.email || "",
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      return false;
+    }
+    return snap.data().approved === true;
+  } catch (err) {
+    console.warn("Volunteer profile check failed:", err);
+    showToast("Could not verify volunteer access.");
+    return false; // fail closed
+  }
 }
 
 /**
@@ -320,8 +338,11 @@ function openSheet(requestId) {
     )}`;
 
   renderActions(job);
-  btnEditSheet.classList.toggle("hidden", job.status !== "claimed" || job.claimedByUid !== currentUser?.uid);
-// btnEditSheet.classList.toggle("hidden", job.status === "done");
+  btnEditSheet.classList.toggle(
+    "hidden",
+    job.status !== "claimed" || job.claimedByUid !== currentUser?.uid,
+  );
+  // btnEditSheet.classList.toggle("hidden", job.status === "done");
 
   sheetOverlay.classList.remove("hidden");
   detailSheet.classList.remove("hidden");
@@ -381,7 +402,11 @@ function createDetailRow(field, value) {
 }
 
 function isLong(field) {
-  return field.type === "textarea" || field.id === "hospitalName" || field.id === "requiredBefore";
+  return (
+    field.type === "textarea" ||
+    field.id === "hospitalName" ||
+    field.id === "requiredBefore"
+  );
 }
 
 function formatField(value, field) {
@@ -730,7 +755,7 @@ const btnEditSheet = document.getElementById("btn-edit-sheet");
 const editBar = document.getElementById("sheet-edit-bar");
 const editableFields = [
   ...getAllRequestSchemaFields(),
-  ...JOB_SCHEMA.filter(f => f.editable === true),
+  ...JOB_SCHEMA.filter((f) => f.editable === true),
 ];
 btnEditSheet.addEventListener("click", () => {
   editing ? cancelEdit() : enterEdit();
@@ -741,8 +766,10 @@ function enterEdit() {
   editing = true;
   editBar.classList.remove("hidden");
 
-  editableFields.forEach(field => {
-    const row = document.querySelector(`.detail-row[data-field-id="${field.id}"]`);
+  editableFields.forEach((field) => {
+    const row = document.querySelector(
+      `.detail-row[data-field-id="${field.id}"]`,
+    );
     if (!row) return;
     row.classList.add("editing");
     const html = renderInput(field, activeRequest[field.id]);
@@ -756,19 +783,23 @@ function enterEdit() {
 function cancelEdit() {
   editing = false;
   editBar.classList.add("hidden");
-  document.querySelectorAll(".detail-row.editing").forEach(row => {
+  document.querySelectorAll(".detail-row.editing").forEach((row) => {
     row.classList.remove("editing");
-    row.querySelectorAll("input, select, textarea, .counter").forEach(el => el.remove());
+    row
+      .querySelectorAll("input, select, textarea, .counter")
+      .forEach((el) => el.remove());
   });
 }
 
-document.getElementById("btn-cancel-edit").addEventListener("click", cancelEdit);
+document
+  .getElementById("btn-cancel-edit")
+  .addEventListener("click", cancelEdit);
 
 document.getElementById("btn-save-edit").addEventListener("click", async () => {
   if (!activeRequest) return;
 
   const updates = {};
-  editableFields.forEach(field => {
+  editableFields.forEach((field) => {
     const el = document.getElementById(`edit-${field.id}`);
     if (!el) return;
     if (field.type === "counter") {
@@ -776,7 +807,9 @@ document.getElementById("btn-save-edit").addEventListener("click", async () => {
     } else if (field.type === "number") {
       updates[field.id] = el.value === "" ? null : parseInt(el.value, 10);
     } else if (field.type === "datetime") {
-      updates[field.id] = el.value ? Timestamp.fromDate(new Date(el.value)) : null;
+      updates[field.id] = el.value
+        ? Timestamp.fromDate(new Date(el.value))
+        : null;
     } else {
       updates[field.id] = el.value.trim();
     }
@@ -790,8 +823,10 @@ document.getElementById("btn-save-edit").addEventListener("click", async () => {
     if (APP_CONFIG.TEST) {
       // Offline/test mode: mutate local state instead of touching Firestore.
       console.log("Test mode: skipping Firestore update. Updates:", updates);
-      Object.assign(activeRequest, updates, { updatedAt: Timestamp.fromDate(new Date()) });
-      const idx = allRequests.findIndex(r => r.id === activeRequest.id);
+      Object.assign(activeRequest, updates, {
+        updatedAt: Timestamp.fromDate(new Date()),
+      });
+      const idx = allRequests.findIndex((r) => r.id === activeRequest.id);
       if (idx !== -1) allRequests[idx] = { ...allRequests[idx], ...updates };
       showToast("Test mode: request updated locally");
       cancelEdit();
@@ -816,7 +851,7 @@ document.getElementById("btn-save-edit").addEventListener("click", async () => {
 });
 
 // counter +/- inside edit mode
-document.addEventListener("click", e => {
+document.addEventListener("click", (e) => {
   const btn = e.target.closest("[data-edit-counter]");
   if (!btn) return;
   const span = document.getElementById(`edit-${btn.dataset.editCounter}`);
