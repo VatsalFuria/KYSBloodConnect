@@ -320,8 +320,8 @@ function openSheet(requestId) {
     )}`;
 
   renderActions(job);
-  // btnEditSheet.classList.toggle("hidden", job.status !== "claimed" || job.claimedByUid !== currentUser?.uid);
-btnEditSheet.classList.toggle("hidden", job.status === "done");
+  btnEditSheet.classList.toggle("hidden", job.status !== "claimed" || job.claimedByUid !== currentUser?.uid);
+// btnEditSheet.classList.toggle("hidden", job.status === "done");
 
   sheetOverlay.classList.remove("hidden");
   detailSheet.classList.remove("hidden");

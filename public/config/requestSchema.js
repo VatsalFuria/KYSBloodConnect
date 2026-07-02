@@ -1,5 +1,6 @@
 // ../config/requestSchema.js
 /*
+Field type renderers are defined here. If you add a new field type, add its renderer here as well.
 const renderers = {
     text: renderText,
     number: renderNumber,
@@ -10,6 +11,8 @@ const renderers = {
     textarea: renderTextarea,
     file: renderFile
 };
+
+AFTER Changes in schema fields, update firestore rules as well.
 
 */
 
@@ -60,7 +63,7 @@ export const REQUEST_SCHEMA = {
           options: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
           required: true,
           default: "",
-          card: { role: "title", order: 1, urgentIf: v => v.includes("-") },
+          card: { role: "title", order: 1, urgentIf: (v) => v.includes("-") },
         },
 
         {
@@ -108,7 +111,7 @@ export const REQUEST_SCHEMA = {
           options: ["North", "South", "East", "West"], //NEED TO POPULATE OPTIONS
           required: true,
           default: "",
-          card: { role: "title", order: 2 },   // same role = joined into one line
+          card: { role: "title", order: 2 }, // same role = joined into one line
         },
 
         {
@@ -200,8 +203,8 @@ export const REQUEST_SCHEMA = {
 };
 
 export function getAllRequestSchemaFields() {
-    return REQUEST_SCHEMA.sections.reduce(
-        (fields, section) => fields.concat(section.fields),
-        []
-    );
+  return REQUEST_SCHEMA.sections.reduce(
+    (fields, section) => fields.concat(section.fields),
+    [],
+  );
 }

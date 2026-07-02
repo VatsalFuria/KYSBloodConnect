@@ -35,7 +35,7 @@ const APP_CONFIG = {
     "Other",
   ],
   TOAST_DURATION: 8, // seconds
-  COLLECTION_NAME: "blood_requests",
+  COLLECTION_NAME: "blood_requests", //ALSO CHANGE IN FIRESTORE RULES
   TEST: true,
 };
 
