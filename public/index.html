@@ -1,212 +1,235 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-  <meta name="theme-color" content="#1a56db"/>
-  <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-  <meta name="apple-mobile-web-app-title" content="KYS Blood Connect"/>
-  <link rel="manifest" href="manifest.json"/>
-  <link rel="apple-touch-icon" href="icons/icon-192.png"/>
-  <title>KYS Blood Connect</title>
-  <link rel="stylesheet" href="app.css"/>
-</head>
-<body>
-
-<div id="screen-auth" class="screen active">
-  <div class="auth-wrap">
-    <div class="auth-logo" data-brand-logo>
-      <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
-        <rect width="56" height="56" rx="16" fill="#1a56db"/>
-        <path d="M14 38l8-14 7 10 5-7 8 11H14z" fill="white" opacity=".9"/>
-        <circle cx="38" cy="20" r="5" fill="white"/>
-      </svg>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#1a56db" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="KYS Blood Connect" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+    <title>KYS Blood Connect Volunteer Dashboard</title>
+    <link rel="stylesheet" href="app.css" />
+  </head>
+  <body>
+    <div id="screen-auth" class="screen active">
+      <div class="auth-wrap">
+        <div class="auth-logo" data-brand-logo>
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+            <rect width="56" height="56" rx="16" fill="#1a56db" />
+            <path d="M14 38l8-14 7 10 5-7 8 11H14z" fill="white" opacity=".9" />
+            <circle cx="38" cy="20" r="5" fill="white" />
+          </svg>
+        </div>
+        <h1 data-brand-name>KYS Blood Connect</h1>
+        <p class="auth-sub">KYS Volunteer coordination platform</p>
+        <button id="btn-google-signin" class="btn btn-primary btn-lg">
+          <svg width="20" height="20" viewBox="0 0 48 48">
+            <path
+              fill="#FFC107"
+              d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"
+            />
+            <path
+              fill="#FF3D00"
+              d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"
+            />
+            <path
+              fill="#4CAF50"
+              d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"
+            />
+            <path
+              fill="#1976D2"
+              d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C42.022 35.936 44 30.318 44 24c0-1.341-.138-2.65-.389-3.917z"
+            />
+          </svg>
+          Sign in with Google
+        </button>
+        <p class="auth-note">
+          Volunteers only - contact your KYS Blood Connect admin for access
+        </p>
+        <a class="auth-link" href="./Request/request2.html"
+          >Need to submit a help request?</a
+        >
+      </div>
     </div>
-    <h1 data-brand-name>KYS Blood Connect</h1>
-    <p class="auth-sub">KYS Volunteer coordination platform</p>
-    <button id="btn-google-signin" class="btn btn-primary btn-lg">
-      <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C42.022 35.936 44 30.318 44 24c0-1.341-.138-2.65-.389-3.917z"/></svg>
-      Sign in with Google
-    </button>
-    <p class="auth-note">Volunteers only - contact your KYS Blood Connect admin for access</p>
-    <a class="auth-link" href="./Request/request2.html">Need to submit a help request?</a>
-  </div>
-</div>
 
-<div id="screen-pending" class="screen">
-  <div class="auth-wrap">
-    <!-- <div class="auth-logo">
+    <div id="screen-pending" class="screen">
+      <div class="auth-wrap">
+        <!-- <div class="auth-logo">
       <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
         <rect width="56" height="56" rx="16" fill="#1a56db"/>
         <path d="M14 38l8-14 7 10 5-7 8 11H14z" fill="white" opacity=".9"/>
         <circle cx="38" cy="20" r="5" fill="white"/>
       </svg>
     </div> -->
-    <h1 data-brand-name>KYS Blood Connect</h1>
-    <p class="auth-sub">Pending ADMIN approval for your ID. <br> Please inform KYS Blood Connect Admin</p>
-    <p class="auth-sub">Refresh and retry once access granted.</p>
-    <!-- <a class="auth-link" href="./Request/request2.html">Need to submit a help request?</a> -->
-  </div>
-</div>
-
-<div id="screen-app" class="screen">
-  <header class="topbar">
-    <span class="topbar-title">Requests</span>
-    <div class="topbar-right">
-      <span id="badge-count" class="badge hidden">0</span>
-      <button id="btn-signout" class="icon-btn" title="Sign out">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      </button>
+        <h1 data-brand-name>KYS Blood Connect</h1>
+        <p class="auth-sub">
+          Pending ADMIN approval for your ID. <br />
+          Please inform KYS Blood Connect Admin
+        </p>
+        <p class="auth-sub">Refresh and retry once access granted.</p>
+        <!-- <a class="auth-link" href="./Request/request2.html">Need to submit a help request?</a> -->
+      </div>
     </div>
-  </header>
 
-  <nav class="tabs">
-    <button class="tab active" data-filter="active">Open & Claimed</button>
-    <!-- <button class="tab" data-filter="claimed">Claimed</button> -->
-    <button class="tab" data-filter="done">Done</button>
-    <button class="tab" data-filter="all">All</button>
-  </nav>
+    <div id="screen-app" class="screen">
+      <header class="topbar">
+        <span class="topbar-title">Requests</span>
+        <div class="topbar-right">
+          <span id="badge-count" class="badge hidden">0</span>
+          <button id="btn-signout" class="icon-btn" title="Sign out">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </button>
+        </div>
+      </header>
 
-  <p class="list-note">Showing the most recent requests only to reduce Firestore usage on the free plan.</p>
+      <nav class="tabs">
+        <button class="tab active" data-filter="active">Open & Claimed</button>
+        <!-- <button class="tab" data-filter="claimed">Claimed</button> -->
+        <button class="tab" data-filter="done">Done</button>
+        <button class="tab" data-filter="all">All</button>
+      </nav>
 
-  <main id="request-list" class="list-wrap">
-    <div class="empty-state hidden" id="empty-state">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
-      <p>No requests here</p>
+      <p class="list-note">
+        Showing the most recent requests only to reduce Firestore usage on the
+        free plan.
+      </p>
+
+      <main id="request-list" class="list-wrap">
+        <div class="empty-state hidden" id="empty-state">
+          <svg
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          >
+            <path
+              d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"
+            />
+            <rect x="9" y="3" width="6" height="4" rx="1" />
+          </svg>
+          <p>No requests here</p>
+        </div>
+        <div id="cards-container"></div>
+      </main>
+
+      <div id="alert-banner" class="notif-banner hidden">
+        <span id="alert-banner-copy"></span>
+        <button id="btn-dismiss-alert-banner" class="btn btn-sm btn-ghost">
+          Dismiss
+        </button>
+      </div>
     </div>
-    <div id="cards-container"></div>
-  </main>
 
-  <div id="alert-banner" class="notif-banner hidden">
-    <span id="alert-banner-copy"></span>
-    <button id="btn-dismiss-alert-banner" class="btn btn-sm btn-ghost">Dismiss</button>
-  </div>
+    <div id="sheet-overlay" class="sheet-overlay hidden"></div>
+    <div id="detail-sheet" class="detail-sheet hidden">
+      <div class="sheet-handle"></div>
 
-</div>
-
-<div id="sheet-overlay" class="sheet-overlay hidden"></div>
-<div id="detail-sheet" class="detail-sheet hidden">
-    <div class="sheet-handle"></div>
-
-    <!-- Header -->
-    <div class="sheet-header">
-
+      <!-- Header -->
+      <div class="sheet-header">
         <div class="sheet-header-info">
-            <h2 id="sheet-title"></h2>
+          <h2 id="sheet-title"></h2>
 
-            <div class="sheet-subtitle">
-                <span id="sheet-status-badge" class="status-badge"></span>
-            </div>
-
-            
+          <div class="sheet-subtitle">
+            <span id="sheet-status-badge" class="status-badge"></span>
+          </div>
         </div>
 
-        <button id="btn-edit-sheet" class="icon-btn" aria-label="Edit">✏️</button>
-
-        <button id="btn-close-sheet" class="icon-btn" aria-label="Close">
-
-            <svg width="20"
-                 height="20"
-                 viewBox="0 0 24 24"
-                 fill="none"
-                 stroke="currentColor"
-                 stroke-width="2">
-
-                <line x1="18" y1="6"
-                      x2="6"
-                      y2="18"></line>
-
-                <line x1="6"
-                      y1="6"
-                      x2="18"
-                      y2="18"></line>
-
-            </svg>
-
+        <button id="btn-edit-sheet" class="icon-btn" aria-label="Edit">
+          ✏️
         </button>
 
-        
-    </div>
+        <button id="btn-close-sheet" class="icon-btn" aria-label="Close">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <line x1="18" y1="6" x2="6" y2="18"></line>
 
-    <!-- Generated from DETAIL_SCHEMA -->
-    <div
-        id="sheet-content"
-        class="sheet-body">
-    </div>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
 
-    <div id="sheet-edit-bar" class="sheet-edit-bar hidden">
-      <button id="btn-save-edit" class="btn btn-primary">Save</button>
-      <button id="btn-cancel-edit" class="btn btn-outline">Cancel</button>
-    </div>
+      <!-- Generated from DETAIL_SCHEMA -->
+      <div id="sheet-content" class="sheet-body"></div>
 
-    <!-- Quick Actions -->
-    <div class="contact-row">
+      <div id="sheet-edit-bar" class="sheet-edit-bar hidden">
+        <button id="btn-save-edit" class="btn btn-primary">Save</button>
+        <button id="btn-cancel-edit" class="btn btn-outline">Cancel</button>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="contact-row">
+        <a id="btn-call" href="#" class="btn btn-outline btn-contact"> Call </a>
 
         <a
-            id="btn-call"
-            href="#"
-            class="btn btn-outline btn-contact">
-
-            Call
-
+          id="btn-whatsapp"
+          href="#"
+          target="_blank"
+          class="btn btn-outline btn-contact"
+        >
+          WhatsApp
         </a>
 
         <a
-            id="btn-whatsapp"
-            href="#"
-            target="_blank"
-            class="btn btn-outline btn-contact">
-
-            WhatsApp
-
+          id="btn-maps"
+          href="#"
+          target="_blank"
+          class="btn btn-outline btn-contact"
+        >
+          Maps
         </a>
+      </div>
 
-        <a
-            id="btn-maps"
-            href="#"
-            target="_blank"
-            class="btn btn-outline btn-contact">
+      <!-- Workflow Actions -->
+      <div id="action-area" class="action-area"></div>
 
-            Maps
-
-        </a>
-
-    </div>
-
-    <!-- Workflow Actions -->
-    <div
-        id="action-area"
-        class="action-area">
-    </div>
-
-    <!-- Completion Notes -->
-    <div
-        id="completion-notes-wrap"
-        class="completion-notes-wrap hidden">
-
-        <label
-            class="field-label"
-            for="completion-notes">
-
-            Completion Notes
-
+      <!-- Completion Notes -->
+      <div id="completion-notes-wrap" class="completion-notes-wrap hidden">
+        <label class="field-label" for="completion-notes">
+          Completion Notes
         </label>
 
         <textarea
-            id="completion-notes"
-            class="textarea"
-            rows="1"
-            placeholder="What was done?">
+          id="completion-notes"
+          class="textarea"
+          rows="1"
+          placeholder="What was done?"
+        >
         </textarea>
-
+      </div>
     </div>
 
-</div>
+    <div id="toast" class="toast hidden"></div>
 
-<div id="toast" class="toast hidden"></div>
-
-<script type="module" src="branding.js"></script>
-<script type="module" src="app.js"></script>
-</body>
+    <script type="module" src="branding.js"></script>
+    <script type="module" src="app.js"></script>
+  </body>
 </html>
