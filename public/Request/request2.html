@@ -13,17 +13,58 @@
   </head>
   <body class="request-page">
     <main class="request-shell">
-      <section class="request-hero">
-        <p class="request-kicker">Public Intake</p>
-        <h1>Request Blood Assistance from KYS</h1>
-        <div class="request-warning">
-          <strong>Important:</strong> Submit this form only once per
-          requirement.
+      <!-- Screen 1: Disclaimer -->
+      <section id="screen-disclaimer" class="request-screen active">
+        <div class="request-hero">
+          <p class="request-kicker" id="disclaimer-kicker"></p>
+          <h1 id="disclaimer-title"></h1>
         </div>
+        <section class="request-card">
+          <p class="request-copy" id="disclaimer-intro"></p>
+          <ul class="disclaimer-points" id="disclaimer-points"></ul>
+          <label class="confirm-row">
+            <input type="checkbox" id="disclaimer-agree" />
+            <span id="disclaimer-agree-label"></span>
+          </label>
+          <button
+            id="btn-disclaimer-continue"
+            class="btn btn-primary btn-lg btn-block"
+            disabled
+          ></button>
+        </section>
       </section>
 
-      <section class="request-card">
-        <div id="formContainer"></div>
+      <!-- Screen 2: Form -->
+      <section id="screen-form" class="request-screen">
+        <div class="request-hero">
+          <p class="request-kicker">Public Intake</p>
+          <h1>Request Blood Assistance from KYS</h1>
+          <div class="request-warning">
+            <strong>Important:</strong> Submit this form only once per
+            requirement.
+          </div>
+        </div>
+        <section class="request-card">
+          <div id="formContainer"></div>
+        </section>
+      </section>
+
+      <!-- Screen 3: Success / next steps -->
+      <section id="screen-success" class="request-screen">
+        <div class="request-hero">
+          <p class="request-kicker">Submitted</p>
+          <h1 id="success-title"></h1>
+        </div>
+        <section class="request-card">
+          <p class="request-copy" id="success-message"></p>
+          <ul class="disclaimer-points" id="success-steps"></ul>
+          <p class="request-meta" id="success-support-note"></p>
+          <p class="request-meta" id="success-reference"></p>
+          <button
+            id="btn-submit-another"
+            class="btn btn-outline btn-lg btn-block"
+          ></button>
+        </section>
       </section>
     </main>
 

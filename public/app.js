@@ -305,6 +305,10 @@ function openSheet(requestId) {
 
   activeRequest = job;
 
+    // FIX 1: Clear the entire container here ONCE before rendering begins
+  const container = document.getElementById("sheet-content");
+  container.innerHTML = "";
+
   document.getElementById("sheet-title").textContent =
     `${job.bloodGroup} Blood Request`;
 
@@ -356,6 +360,9 @@ function openSheet(requestId) {
 function renderSchemaSections(sections, job) {
   const container = document.getElementById("sheet-content");
 
+    // FIX 2: Optimized using an in-memory fragment to batch DOM additions
+  const fragment = document.createDocumentFragment();
+
   for (const section of sections) {
     const sectionEl = document.createElement("section");
 
@@ -376,9 +383,10 @@ function renderSchemaSections(sections, job) {
     }
 
     sectionEl.appendChild(grid);
-
-    container.appendChild(sectionEl);
+    fragment.appendChild(sectionEl);
+  
   }
+  container.appendChild(fragment);
 }
 
 function createDetailRow(field, value) {
@@ -493,6 +501,7 @@ sheetOverlay.addEventListener("click", closeSheet);
  * Closes the request detail sheet and clears its temporary state.
  */
 function closeSheet() {
+  cancelEdit(); // reset edit-mode state so it can't leak into the next open
   sheetOverlay.classList.remove("visible");
   detailSheet.classList.remove("visible");
   setTimeout(() => {

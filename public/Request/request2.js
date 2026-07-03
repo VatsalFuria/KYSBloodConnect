@@ -1,10 +1,12 @@
 // request2.js
-// Handles counter interactivity and Firebase submission for request2.html.
+// Handles the disclaimer → form → success flow, counter interactivity, and
+// Firebase submission for request2.html.
 // request2.html must load requestRender.js first (which renders the form),
 // then this file.
 
 import { FIREBASE_CONFIG, APP_CONFIG } from "../firebase-config.js";
 import { REQUEST_SCHEMA } from "../config/requestSchema.js";
+import { REQUEST_PAGE_CONFIG } from "../config/requestPageConfig.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   addDoc,
@@ -21,10 +23,95 @@ const db = getFirestore(app);
 const toastEl = document.getElementById("request-toast");
 const cooldownKey = "ngo:last-blood-submit-at";
 
-// ── Counter state ────────────────────────────────────────────────────────────
-// Mirrors the rendered <span> values since FormData can't read them.
-
 console.log("request.js loaded");
+
+// ── Screens ──────────────────────────────────────────────────────────────
+const screens = {
+  disclaimer: document.getElementById("screen-disclaimer"),
+  form: document.getElementById("screen-form"),
+  success: document.getElementById("screen-success"),
+};
+
+function showScreen(name) {
+  Object.entries(screens).forEach(([key, el]) =>
+    el.classList.toggle("active", key === name),
+  );
+  window.scrollTo(0, 0);
+}
+
+// ── Disclaimer screen: render config + gate the continue button ──────────
+const agreeCheckbox = document.getElementById("disclaimer-agree");
+const continueBtn = document.getElementById("btn-disclaimer-continue");
+
+function renderDisclaimer() {
+  const cfg = REQUEST_PAGE_CONFIG.disclaimer;
+  document.getElementById("disclaimer-kicker").textContent = cfg.kicker;
+  document.getElementById("disclaimer-title").textContent = cfg.title;
+  document.getElementById("disclaimer-intro").textContent = cfg.intro;
+
+  const list = document.getElementById("disclaimer-points");
+  list.innerHTML = "";
+  cfg.points.forEach((point) => {
+    const li = document.createElement("li");
+    li.textContent = point;
+    list.appendChild(li);
+  });
+
+  document.getElementById("disclaimer-agree-label").textContent =
+    cfg.agreeLabel;
+  continueBtn.textContent = cfg.continueLabel;
+}
+
+agreeCheckbox.addEventListener("change", () => {
+  continueBtn.disabled = !agreeCheckbox.checked;
+});
+
+continueBtn.addEventListener("click", () => {
+  if (!agreeCheckbox.checked) return;
+  showScreen("form");
+});
+
+// ── Success screen: render config + reveal it after submission ───────────
+function renderSuccessContent() {
+  const cfg = REQUEST_PAGE_CONFIG.success;
+  document.getElementById("success-title").textContent = cfg.title;
+  document.getElementById("success-message").textContent = cfg.message;
+
+  const list = document.getElementById("success-steps");
+  list.innerHTML = "";
+  cfg.steps.forEach((step) => {
+    const li = document.createElement("li");
+    li.textContent = step;
+    list.appendChild(li);
+  });
+
+  document.getElementById("success-support-note").textContent =
+    cfg.supportNote ?? "";
+  document.getElementById("btn-submit-another").textContent =
+    cfg.submitAnotherLabel;
+}
+
+function showSuccessScreen(referenceId) {
+  document.getElementById("success-reference").textContent = referenceId
+    ? `Reference: ${referenceId}`
+    : "";
+  showScreen("success");
+}
+
+document.getElementById("btn-submit-another").addEventListener("click", () => {
+  // Send back to the disclaimer rather than straight to the form —
+  // reinforces "one submission per requirement" for anyone submitting
+  // a second, different request in the same session.
+  agreeCheckbox.checked = false;
+  continueBtn.disabled = true;
+  showScreen("disclaimer");
+});
+
+renderDisclaimer();
+renderSuccessContent();
+
+// ── Counter state ────────────────────────────────────────────────────────
+// Mirrors the rendered <span> values since FormData can't read them.
 
 const counterValues = {};
 
@@ -56,7 +143,7 @@ document.addEventListener("click", (e) => {
   if (display) display.textContent = counterValues[fieldId];
 });
 
-// ── Form submission ──────────────────────────────────────────────────────────
+// ── Form submission ──────────────────────────────────────────────────────
 // The form is created dynamically by requestRender.js which runs first.
 // We attach via event delegation on document so timing is never an issue.
 document.addEventListener("submit", async (e) => {
@@ -91,17 +178,18 @@ document.addEventListener("submit", async (e) => {
   try {
     if (APP_CONFIG.TEST) {
       console.log("Test mode: not submitting to Firestore.");
-      showToast("Test mode: submission skipped.");
-
       console.log("Payload:", {
         ...getDefaultJobData(),
         ...payload,
-
         source: "blood_request_form",
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
 
+      localStorage.setItem(cooldownKey, String(now));
+      e.target.reset();
+      resetCounters();
+      showSuccessScreen("TEST-MODE");
       return;
     }
 
@@ -117,7 +205,7 @@ document.addEventListener("submit", async (e) => {
     localStorage.setItem(cooldownKey, String(now));
     e.target.reset();
     resetCounters();
-    showToast(`Submitted. Reference: ${ref.id}`);
+    showSuccessScreen(ref.id);
   } catch (err) {
     console.error(err);
     showToast("Could not submit. Please try again.");

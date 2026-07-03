@@ -208,8 +208,9 @@ body {
   background: var(--white); border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   box-shadow: var(--shadow-lg);
   max-height: 92dvh; display: flex; flex-direction: column;
+  gap: 14px;
   transition: transform .3s cubic-bezier(.22,1,.36,1);
-  padding-bottom: var(--safe-bot);
+  padding-bottom: calc(16px + var(--safe-bot));
 }
 .detail-sheet.visible { transform: translateX(-50%) translateY(0); }
 
@@ -281,8 +282,8 @@ body {
 .info-value { font-size: 15px; color: var(--gray-800); margin-top: 1px; }
 
 /* ── Action area ──────────────────────────────────────────────────────────── */
-.action-area { display: flex; flex-direction: column; gap: 10px; }
-.contact-row { display: flex; gap: 8px; }
+.action-area { display: flex; flex-direction: column; gap: 10px; padding: 0 20px; }
+.contact-row { display: flex; gap: 8px; padding: 0 20px; }
 
 /* ── Completion notes ─────────────────────────────────────────────────────── */
 .field-label { font-size: 15px; font-weight: 600; color: var(--gray-600); display: block; margin-bottom: 6px; }
@@ -335,3 +336,5 @@ body {
 
 /* ── Utilities ────────────────────────────────────────────────────────────── */
 .hidden { display: none !important; }
+
+.completion-notes-wrap { padding: 0 20px; }

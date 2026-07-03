@@ -1,4 +1,4 @@
-rules_version = '3';
+rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -6,7 +6,7 @@ service cloud.firestore {
       allow read: if request.auth != null;
       allow create: if isValidPublicCreate();
       allow update: if request.auth != null && isValidVolunteerUpdate();
-      allow delete: if false;
+      allow delete: if request.auth != null && isAdmin();
     }
 
     function isAdmin() {
