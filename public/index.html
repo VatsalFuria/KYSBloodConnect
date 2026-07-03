@@ -16,14 +16,14 @@
 
 <div id="screen-auth" class="screen active">
   <div class="auth-wrap">
-    <div class="auth-logo">
+    <div class="auth-logo" data-brand-logo>
       <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
         <rect width="56" height="56" rx="16" fill="#1a56db"/>
         <path d="M14 38l8-14 7 10 5-7 8 11H14z" fill="white" opacity=".9"/>
         <circle cx="38" cy="20" r="5" fill="white"/>
       </svg>
     </div>
-    <h1>KYS Blood Connect</h1>
+    <h1 data-brand-name>KYS Blood Connect</h1>
     <p class="auth-sub">KYS Volunteer coordination platform</p>
     <button id="btn-google-signin" class="btn btn-primary btn-lg">
       <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C42.022 35.936 44 30.318 44 24c0-1.341-.138-2.65-.389-3.917z"/></svg>
@@ -43,7 +43,7 @@
         <circle cx="38" cy="20" r="5" fill="white"/>
       </svg>
     </div> -->
-    <h1>KYS Blood Connect</h1>
+    <h1 data-brand-name>KYS Blood Connect</h1>
     <p class="auth-sub">Pending ADMIN approval for your ID. <br> Please inform KYS Blood Connect Admin</p>
     <p class="auth-sub">Refresh and retry once access granted.</p>
     <!-- <a class="auth-link" href="./Request/request2.html">Need to submit a help request?</a> -->
@@ -86,81 +86,6 @@
 </div>
 
 <div id="sheet-overlay" class="sheet-overlay hidden"></div>
-<!-- 
-<div id="detail-sheet" class="detail-sheet hidden">
-  <div class="sheet-handle"></div>
-
-  <div class="sheet-header">
-    <div>
-      <h2 id="d-type"></h2>
-      <span id="d-urgency-badge" class="urgency-badge"></span>
-    </div>
-    <button id="btn-close-sheet" class="icon-btn">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
-  </div>
-
-  <div class="sheet-body">
-    <div class="info-row">
-      <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <div>
-        <div class="info-label">Requester</div>
-        <div id="d-name" class="info-value"></div>
-      </div>
-    </div>
-    <div class="info-row">
-      <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-      <div>
-        <div class="info-label">Phone</div>
-        <div id="d-phone" class="info-value"></div>
-      </div>
-    </div>
-    <div class="info-row">
-      <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      <div>
-        <div class="info-label">Address</div>
-        <div id="d-address" class="info-value"></div>
-      </div>
-    </div>
-    <div class="info-row" id="d-notes-row">
-      <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-      <div>
-        <div class="info-label">Notes</div>
-        <div id="d-notes" class="info-value"></div>
-      </div>
-    </div>
-    <div class="info-row" id="d-claimed-row">
-      <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      <div>
-        <div class="info-label">Claimed by</div>
-        <div id="d-claimed-by" class="info-value"></div>
-      </div>
-    </div>
-
-    <div id="action-area" class="action-area"></div>
-
-    <div class="contact-row">
-      <a id="btn-call" href="#" class="btn btn-outline btn-contact">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.21 15a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.12 4.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6z"/></svg>
-        Call
-      </a>
-      <a id="btn-maps" href="#" target="_blank" class="btn btn-outline btn-contact">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-        Maps
-      </a>
-      <a id="btn-whatsapp" href="#" target="_blank" class="btn btn-outline btn-contact">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-        WhatsApp
-      </a>
-    </div>
-
-    <div id="completion-notes-wrap" class="hidden">
-      <label class="field-label" for="completion-notes">Completion notes (optional)</label>
-      <textarea id="completion-notes" class="textarea" rows="3" placeholder="What was done, any follow-up needed..."></textarea>
-    </div>
-  </div>
-</div> -->
-
 <div id="detail-sheet" class="detail-sheet hidden">
     <div class="sheet-handle"></div>
 
@@ -281,6 +206,7 @@
 
 <div id="toast" class="toast hidden"></div>
 
+<script type="module" src="branding.js"></script>
 <script type="module" src="app.js"></script>
 </body>
 </html>

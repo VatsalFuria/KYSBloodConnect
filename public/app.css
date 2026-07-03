@@ -338,3 +338,8 @@ body {
 .hidden { display: none !important; }
 
 .completion-notes-wrap { padding: 0 20px; }
+
+.brand-logo-img { height: 56px; width: auto; }
+.brand-banner { margin-bottom: 16px; }
+.brand-banner-img { width: 100%; border-radius: var(--radius-md); display: block; }
+.topbar-logo { height: 28px; width: auto; margin-right: 8px; }

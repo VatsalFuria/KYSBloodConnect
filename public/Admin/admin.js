@@ -16,7 +16,8 @@ const db = getFirestore(app);
 const COLLECTION = APP_CONFIG.COLLECTION_NAME;
 
 let currentUser = null;
-let allDocsCache = []; // last analytics load, used for export
+let allDocsCache = [];        // last raw-record load, used for record export
+let lastAnalyticsCards = [];  // last computed summary, used for analytics export
 let rejectTargetId = null;
 
 const screens = {
@@ -56,6 +57,9 @@ async function loadPendingVolunteers() {
 
   const snap = await getDocs(collection(db, "volunteers"));
   const pending = snap.docs.filter((d) => d.data().approved !== true);
+
+  document.getElementById("count-pending-volunteers").textContent = pending.length;
+  document.getElementById("overview-pending-count").textContent = pending.length;
 
   if (pending.length === 0) {
     wrap.innerHTML = `<p class="admin-empty">No pending volunteers.</p>`;
@@ -122,6 +126,11 @@ async function loadOpenRequests() {
 
   const snap = await getDocs(query(collection(db, COLLECTION), orderBy("createdAt", "desc")));
   const open = snap.docs.filter((d) => d.data().status === "open");
+
+  document.getElementById("count-open-requests").textContent = open.length;
+  document.getElementById("overview-open-count").textContent = open.length;
+  document.getElementById("overview-open-pill")
+    .classList.toggle("overview-attention", open.length > 0);
 
   if (open.length === 0) {
     wrap.innerHTML = `<p class="admin-empty">No open requests.</p>`;
@@ -208,8 +217,9 @@ document.getElementById("btn-confirm-reject").addEventListener("click", async ()
 
 // ── 3. Analytics / Export / Archive ─────────────────────────────────────────
 document.getElementById("btn-load-analytics").addEventListener("click", loadAnalytics);
-document.getElementById("btn-export-csv").addEventListener("click", () => exportData("csv"));
-document.getElementById("btn-export-json").addEventListener("click", () => exportData("json"));
+document.getElementById("btn-export-csv").addEventListener("click", () => exportRecords("csv"));
+document.getElementById("btn-export-json").addEventListener("click", () => exportRecords("json"));
+document.getElementById("btn-export-analytics").addEventListener("click", exportAnalyticsSummary);
 document.getElementById("btn-clear-archived").addEventListener("click", clearArchivedRequests);
 
 async function loadAnalytics() {
@@ -246,6 +256,7 @@ async function loadAnalytics() {
     { label: "Avg. claim→done (hrs)", value: avgHours },
     ...Object.entries(byBloodGroup).map(([bg, n]) => ({ label: bg, value: n })),
   ];
+  lastAnalyticsCards = cards;
 
   out.innerHTML = cards
     .map(
@@ -255,6 +266,7 @@ async function loadAnalytics() {
 
   document.getElementById("btn-export-csv").disabled = false;
   document.getElementById("btn-export-json").disabled = false;
+  document.getElementById("btn-export-analytics").disabled = false;
   document.getElementById("btn-clear-archived").disabled = false;
 }
 
@@ -266,7 +278,9 @@ function countBy(list, key) {
   }, {});
 }
 
-function exportData(format) {
+// Raw-record export (unchanged behavior, renamed from exportData for clarity
+// now that there are two distinct export types).
+function exportRecords(format) {
   if (allDocsCache.length === 0) {
     showToast("Load analytics first.");
     return;
@@ -283,6 +297,27 @@ function exportData(format) {
   a.click();
   URL.revokeObjectURL(a.href);
   showToast(`Exported ${rows.length} records`);
+}
+
+// New: exports the aggregated stat cards (what's on screen), not raw records —
+// a compact summary suitable for sharing, e.g. with the board or funders.
+function exportAnalyticsSummary() {
+  if (lastAnalyticsCards.length === 0) {
+    showToast("Load analytics first.");
+    return;
+  }
+
+  const rows = lastAnalyticsCards.map((c) => ({ metric: c.label, value: c.value }));
+  const filename = `ngo-analytics-summary-${new Date().toISOString().slice(0, 10)}.csv`;
+  const content = toCsv(rows);
+  const blob = new Blob([content], { type: "text/csv" });
+
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast("Analytics summary exported");
 }
 
 function flattenForExport(job) {
@@ -331,8 +366,10 @@ async function clearArchivedRequests() {
     }
     showToast(`Deleted ${toDelete.length} requests`);
     allDocsCache = [];
+    lastAnalyticsCards = [];
     document.getElementById("btn-export-csv").disabled = true;
     document.getElementById("btn-export-json").disabled = true;
+    document.getElementById("btn-export-analytics").disabled = true;
     document.getElementById("btn-clear-archived").disabled = true;
     document.getElementById("analytics-output").innerHTML = "";
     loadOpenRequests();
