@@ -305,7 +305,7 @@ function openSheet(requestId) {
 
   activeRequest = job;
 
-    // FIX 1: Clear the entire container here ONCE before rendering begins
+  // FIX 1: Clear the entire container here ONCE before rendering begins
   const container = document.getElementById("sheet-content");
   container.innerHTML = "";
 
@@ -360,7 +360,7 @@ function openSheet(requestId) {
 function renderSchemaSections(sections, job) {
   const container = document.getElementById("sheet-content");
 
-    // FIX 2: Optimized using an in-memory fragment to batch DOM additions
+  // FIX 2: Optimized using an in-memory fragment to batch DOM additions
   const fragment = document.createDocumentFragment();
 
   for (const section of sections) {
@@ -384,7 +384,6 @@ function renderSchemaSections(sections, job) {
 
     sectionEl.appendChild(grid);
     fragment.appendChild(sectionEl);
-  
   }
   container.appendChild(fragment);
 }
