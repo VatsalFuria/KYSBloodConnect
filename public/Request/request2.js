@@ -208,7 +208,9 @@ document.addEventListener("submit", async (e) => {
     showSuccessScreen(ref.id);
   } catch (err) {
     console.error(err);
-    showToast("Could not submit. Please try again.");
+    showToast(
+      "Could not submit. Please try again. Error: " + (err.message || err),
+    );
   } finally {
     setSubmitting(submitBtn, false);
   }
@@ -321,6 +323,6 @@ function showToast(msg, duration = APP_CONFIG.TOAST_DURATION * 1000) {
   clearTimeout(toastEl._t);
   toastEl._t = setTimeout(() => {
     toastEl.classList.remove("show");
-    setTimeout(() => toastEl.classList.add("hidden"), 250);
+    setTimeout(() => toastEl.classList.add("hidden"), 300);
   }, duration);
 }

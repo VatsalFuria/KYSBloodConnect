@@ -3,11 +3,24 @@ import { getAllRequestSchemaFields } from "../config/requestSchema.js";
 import { JOB_SCHEMA, createJob } from "../config/jobSchema.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
-  getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut,
+  getAuth,
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  signInWithPopup,
+  signOut,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import {
-  getFirestore, doc, getDoc, getDocs, collection, updateDoc, deleteDoc,
-  serverTimestamp, writeBatch, query, orderBy,
+  getFirestore,
+  doc,
+  getDoc,
+  getDocs,
+  collection,
+  updateDoc,
+  deleteDoc,
+  serverTimestamp,
+  writeBatch,
+  query,
+  orderBy,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const app = initializeApp(FIREBASE_CONFIG);
@@ -16,8 +29,8 @@ const db = getFirestore(app);
 const COLLECTION = APP_CONFIG.COLLECTION_NAME;
 
 let currentUser = null;
-let allDocsCache = [];        // last raw-record load, used for record export
-let lastAnalyticsCards = [];  // last computed summary, used for analytics export
+let allDocsCache = []; // last raw-record load, used for record export
+let lastAnalyticsCards = []; // last computed summary, used for analytics export
 let rejectTargetId = null;
 
 const screens = {
@@ -32,8 +45,12 @@ document.getElementById("btn-google-signin").addEventListener("click", () => {
     showToast("Sign-in failed: " + err.message),
   );
 });
-document.getElementById("btn-signout").addEventListener("click", () => signOut(auth));
-document.getElementById("btn-signout-denied").addEventListener("click", () => signOut(auth));
+document
+  .getElementById("btn-signout")
+  .addEventListener("click", () => signOut(auth));
+document
+  .getElementById("btn-signout-denied")
+  .addEventListener("click", () => signOut(auth));
 
 onAuthStateChanged(auth, async (user) => {
   currentUser = user;
@@ -47,7 +64,9 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 function showScreen(name) {
-  Object.entries(screens).forEach(([k, el]) => el.classList.toggle("active", k === name));
+  Object.entries(screens).forEach(([k, el]) =>
+    el.classList.toggle("active", k === name),
+  );
 }
 
 // ── 1. Volunteer approvals ─────────────────────────────────────────────────
@@ -58,8 +77,10 @@ async function loadPendingVolunteers() {
   const snap = await getDocs(collection(db, "volunteers"));
   const pending = snap.docs.filter((d) => d.data().approved !== true);
 
-  document.getElementById("count-pending-volunteers").textContent = pending.length;
-  document.getElementById("overview-pending-count").textContent = pending.length;
+  document.getElementById("count-pending-volunteers").textContent =
+    pending.length;
+  document.getElementById("overview-pending-count").textContent =
+    pending.length;
 
   if (pending.length === 0) {
     wrap.innerHTML = `<p class="admin-empty">No pending volunteers.</p>`;
@@ -84,12 +105,18 @@ async function loadPendingVolunteers() {
     wrap.appendChild(row);
   });
 
-  wrap.querySelectorAll("[data-approve]").forEach((btn) =>
-    btn.addEventListener("click", () => approveVolunteer(btn.dataset.approve)),
-  );
-  wrap.querySelectorAll("[data-deny]").forEach((btn) =>
-    btn.addEventListener("click", () => denyVolunteer(btn.dataset.deny)),
-  );
+  wrap
+    .querySelectorAll("[data-approve]")
+    .forEach((btn) =>
+      btn.addEventListener("click", () =>
+        approveVolunteer(btn.dataset.approve),
+      ),
+    );
+  wrap
+    .querySelectorAll("[data-deny]")
+    .forEach((btn) =>
+      btn.addEventListener("click", () => denyVolunteer(btn.dataset.deny)),
+    );
 }
 
 async function approveVolunteer(uid) {
@@ -109,7 +136,12 @@ async function approveVolunteer(uid) {
 }
 
 async function denyVolunteer(uid) {
-  if (!confirm("Remove this pending volunteer request? They can sign in again to reapply.")) return;
+  if (
+    !confirm(
+      "Remove this pending volunteer request? They can sign in again to reapply.",
+    )
+  )
+    return;
   try {
     await deleteDoc(doc(db, "volunteers", uid));
     showToast("Volunteer request removed");
@@ -124,12 +156,15 @@ async function loadOpenRequests() {
   const wrap = document.getElementById("open-requests");
   wrap.innerHTML = "Loading…";
 
-  const snap = await getDocs(query(collection(db, COLLECTION), orderBy("createdAt", "desc")));
+  const snap = await getDocs(
+    query(collection(db, COLLECTION), orderBy("createdAt", "desc")),
+  );
   const open = snap.docs.filter((d) => d.data().status === "open");
 
   document.getElementById("count-open-requests").textContent = open.length;
   document.getElementById("overview-open-count").textContent = open.length;
-  document.getElementById("overview-open-pill")
+  document
+    .getElementById("overview-open-pill")
     .classList.toggle("overview-attention", open.length > 0);
 
   if (open.length === 0) {
@@ -154,9 +189,11 @@ async function loadOpenRequests() {
     wrap.appendChild(row);
   });
 
-  wrap.querySelectorAll("[data-reject]").forEach((btn) =>
-    btn.addEventListener("click", () => openRejectSheet(btn.dataset.reject)),
-  );
+  wrap
+    .querySelectorAll("[data-reject]")
+    .forEach((btn) =>
+      btn.addEventListener("click", () => openRejectSheet(btn.dataset.reject)),
+    );
 }
 
 const rejectOverlay = document.getElementById("reject-overlay");
@@ -184,43 +221,57 @@ function closeRejectSheet() {
   }, 280);
 }
 
-document.getElementById("btn-cancel-reject").addEventListener("click", closeRejectSheet);
+document
+  .getElementById("btn-cancel-reject")
+  .addEventListener("click", closeRejectSheet);
 rejectOverlay.addEventListener("click", closeRejectSheet);
 
-document.getElementById("btn-confirm-reject").addEventListener("click", async () => {
-  if (!rejectTargetId) return;
-  const reason = document.getElementById("reject-reason").value;
-  const note = document.getElementById("reject-note").value.trim();
+document
+  .getElementById("btn-confirm-reject")
+  .addEventListener("click", async () => {
+    if (!rejectTargetId) return;
+    const reason = document.getElementById("reject-reason").value;
+    const note = document.getElementById("reject-note").value.trim();
 
-  if (reason === "Other" && !note) {
-    showToast("Add a note for \"Other\".");
-    return;
-  }
+    if (reason === "Other" && !note) {
+      showToast('Add a note for "Other".');
+      return;
+    }
 
-  try {
-    await updateDoc(doc(db, COLLECTION, rejectTargetId), {
-      status: "rejected",
-      rejectedBy: currentUser.displayName || currentUser.email || "Admin",
-      rejectedByUid: currentUser.uid,
-      rejectedAt: serverTimestamp(),
-      rejectionReason: reason,
-      rejectionNote: note,
-      updatedAt: serverTimestamp(),
-    });
-    showToast("Request rejected");
-    closeRejectSheet();
-    loadOpenRequests();
-  } catch (err) {
-    showToast("Failed: " + err.message);
-  }
-});
+    try {
+      await updateDoc(doc(db, COLLECTION, rejectTargetId), {
+        status: "rejected",
+        rejectedBy: currentUser.displayName || currentUser.email || "Admin",
+        rejectedByUid: currentUser.uid,
+        rejectedAt: serverTimestamp(),
+        rejectionReason: reason,
+        rejectionNote: note,
+        updatedAt: serverTimestamp(),
+      });
+      showToast("Request rejected");
+      closeRejectSheet();
+      loadOpenRequests();
+    } catch (err) {
+      showToast("Failed: " + err.message);
+    }
+  });
 
 // ── 3. Analytics / Export / Archive ─────────────────────────────────────────
-document.getElementById("btn-load-analytics").addEventListener("click", loadAnalytics);
-document.getElementById("btn-export-csv").addEventListener("click", () => exportRecords("csv"));
-document.getElementById("btn-export-json").addEventListener("click", () => exportRecords("json"));
-document.getElementById("btn-export-analytics").addEventListener("click", exportAnalyticsSummary);
-document.getElementById("btn-clear-archived").addEventListener("click", clearArchivedRequests);
+document
+  .getElementById("btn-load-analytics")
+  .addEventListener("click", loadAnalytics);
+document
+  .getElementById("btn-export-csv")
+  .addEventListener("click", () => exportRecords("csv"));
+document
+  .getElementById("btn-export-json")
+  .addEventListener("click", () => exportRecords("json"));
+document
+  .getElementById("btn-export-analytics")
+  .addEventListener("click", exportAnalyticsSummary);
+document
+  .getElementById("btn-clear-archived")
+  .addEventListener("click", clearArchivedRequests);
 
 async function loadAnalytics() {
   const out = document.getElementById("analytics-output");
@@ -239,7 +290,8 @@ async function loadAnalytics() {
   const avgHours = doneWithTimes.length
     ? (
         doneWithTimes.reduce(
-          (sum, r) => sum + (r.completedAt.toDate() - r.claimedAt.toDate()) / 36e5,
+          (sum, r) =>
+            sum + (r.completedAt.toDate() - r.claimedAt.toDate()) / 36e5,
           0,
         ) / doneWithTimes.length
       ).toFixed(1)
@@ -260,7 +312,8 @@ async function loadAnalytics() {
 
   out.innerHTML = cards
     .map(
-      (c) => `<div class="stat-card"><div class="stat-value">${c.value}</div><div class="stat-label">${esc(c.label)}</div></div>`,
+      (c) =>
+        `<div class="stat-card"><div class="stat-value">${c.value}</div><div class="stat-label">${esc(c.label)}</div></div>`,
     )
     .join("");
 
@@ -288,8 +341,11 @@ function exportRecords(format) {
 
   const rows = allDocsCache.map(flattenForExport);
   const filename = `ngo-requests-${new Date().toISOString().slice(0, 10)}.${format}`;
-  const content = format === "csv" ? toCsv(rows) : JSON.stringify(rows, null, 2);
-  const blob = new Blob([content], { type: format === "csv" ? "text/csv" : "application/json" });
+  const content =
+    format === "csv" ? toCsv(rows) : JSON.stringify(rows, null, 2);
+  const blob = new Blob([content], {
+    type: format === "csv" ? "text/csv" : "application/json",
+  });
 
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -307,7 +363,10 @@ function exportAnalyticsSummary() {
     return;
   }
 
-  const rows = lastAnalyticsCards.map((c) => ({ metric: c.label, value: c.value }));
+  const rows = lastAnalyticsCards.map((c) => ({
+    metric: c.label,
+    value: c.value,
+  }));
   const filename = `ngo-analytics-summary-${new Date().toISOString().slice(0, 10)}.csv`;
   const content = toCsv(rows);
   const blob = new Blob([content], { type: "text/csv" });
@@ -337,12 +396,16 @@ function toCsv(rows) {
   const headers = Object.keys(rows[0]);
   const escapeCell = (v) => `"${String(v).replace(/"/g, '""')}"`;
   const lines = [headers.join(",")];
-  rows.forEach((row) => lines.push(headers.map((h) => escapeCell(row[h])).join(",")));
+  rows.forEach((row) =>
+    lines.push(headers.map((h) => escapeCell(row[h])).join(",")),
+  );
   return lines.join("\n");
 }
 
 async function clearArchivedRequests() {
-  const toDelete = allDocsCache.filter((r) => r.status === "done" || r.status === "rejected");
+  const toDelete = allDocsCache.filter(
+    (r) => r.status === "done" || r.status === "rejected",
+  );
   if (toDelete.length === 0) {
     showToast("Nothing to clear.");
     return;
@@ -353,7 +416,7 @@ async function clearArchivedRequests() {
       `Make sure you already exported them.\n\nType DELETE to confirm.`,
   );
   if (confirmText !== "DELETE") {
-    showToast("Cancelled.");
+    showToast("Please Enter DELETE (Casesensitive) to confirm deletion.");
     return;
   }
 
@@ -379,17 +442,20 @@ async function clearArchivedRequests() {
 }
 
 // ── Utils ────────────────────────────────────────────────────────────────
-function showToast(msg, duration = 3500) {
+function showToast(msg, duration = APP_CONFIG.TOAST_DURATION * 1000) {
   toastEl.textContent = msg;
   toastEl.classList.remove("hidden");
   toastEl.classList.add("show");
   clearTimeout(toastEl._t);
   toastEl._t = setTimeout(() => {
     toastEl.classList.remove("show");
-    setTimeout(() => toastEl.classList.add("hidden"), 250);
+    setTimeout(() => toastEl.classList.add("hidden"), 300);
   }, duration);
 }
 
 function esc(str = "") {
-  return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }

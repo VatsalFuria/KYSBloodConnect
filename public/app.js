@@ -706,14 +706,14 @@ function showScreen(name) {
 /**
  * Displays a temporary toast message.
  */
-function showToast(msg, duration = 3000) {
+function showToast(msg, duration = APP_CONFIG.TOAST_DURATION * 1000) {
   toastEl.textContent = msg;
   toastEl.classList.remove("hidden");
   toastEl.classList.add("show");
   clearTimeout(toastEl._t);
   toastEl._t = setTimeout(() => {
     toastEl.classList.remove("show");
-    setTimeout(() => toastEl.classList.add("hidden"), 250);
+    setTimeout(() => toastEl.classList.add("hidden"), 300);
   }, duration);
 }
 
