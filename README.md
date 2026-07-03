@@ -95,12 +95,6 @@ Supporting collections: `volunteers` (approval status, FCM token),
 `admins` (uid-keyed, written manually via console — no self-service admin
 creation).
 
-## Testing
-
-- Manual test checklist and Firestore-rules unit tests: see `tests/` and the
-  testing section of the project wiki / internal docs.
-- Run rules tests with `npm run test:rules` (requires the Firestore emulator).
-
 ## Deployment
 
 ```bash
@@ -126,6 +120,56 @@ upload path in the current build.
 Both are addressed with concrete implementation options in the project's
 architecture notes.
 
+**Fetch Limit** A configurable maximum limit has been set on the number of requests 
+that will be fetched, for a smoother experience.   MAX_ACTIVE_REQUESTS_QUERY: 100, LIMIT_REQUEST_QUERY: true,
+Thus after a history of 100 records, it is mandatory to export and archive the previous request data. 
+
 ## License
 
 Add your organization's preferred license here.
+
+## Testing
+
+1. Public intake (/request.html via emulator hosting)
+
+Disclaimer checkbox gates the Continue button
+Submitting with a required field empty is rejected client-side
+Honeypot field submission is silently dropped (check no doc created)
+Non-10-digit mobile is rejected
+All-zero blood units is rejected
+Successful submit shows the reference ID and appears in Firestore
+Second submit within cooldown window is blocked with correct countdown
+Submitting a status, claimedBy, etc. via browser devtools (bypassing the form) is rejected by rules, not just the client
+
+2. Volunteer auth & app
+
+New Google sign-in creates a volunteers/{uid} doc, unapproved, shows "pending" screen
+Unapproved volunteer cannot read blood_requests (test directly against rules, not just UI)
+After admin approval, volunteer sees the live list
+Tabs (Open & Claimed / Done / All) filter correctly
+Claim → on the way → done happens in order; "Drop claim" returns it to open
+A second volunteer cannot claim an already-claimed request (simulate the race: open two browser profiles)
+Edit mode only appears for the volunteer who claimed the request, and only while claimed
+Edited fields save correctly and validate types (counters, dates)
+
+3. Admin console
+
+Non-admin Google account is denied at admin.html
+Pending volunteer approve/deny works and reflects immediately
+Reject flow requires a note when reason is "Other"
+Analytics counts match what's actually in Firestore
+CSV and JSON export download and open correctly
+"Clear done/rejected" requires typing DELETE and actually removes only those docs
+
+4. Rules edge cases (do these with curl/Postman against the emulator, not the UI — the UI won't let you send invalid data)
+
+Create with status != 'open' → denied
+Create with createdAt != request.time → denied
+Update from open → done directly (skipping claimed) → denied
+Update by a UID that isn't claimedByUid → denied
+Delete by non-admin → denied
+
+5. PWA / offline
+
+Manifest installs correctly (Chrome "Install app" prompt)
+Shell loads from cache when offline; Firestore calls fail gracefully instead of crashing

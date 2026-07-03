@@ -194,7 +194,7 @@ service cloud.firestore {
 
     // New: covers the "Save" edit-mode button, which changes request/job
     // details without changing status. Only the current claimer may edit
-    // once a request is claimed; anyone signed in may correct an open one.
+    // once a request is claimed;
     function isFieldEditTransition() {
       return onlyDetailFieldsChanged()
         && request.resource.data.status == resource.data.status
